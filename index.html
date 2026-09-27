@@ -3,67 +3,985 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>ハロプロ好き顔9選メーカー</title>
 
 <style>
-body {
-  margin: 0;
-  padding: 30px 15px;
-  font-family: sans-serif;
-  text-align: center;
-  background: #f7f7f7;
+* {
+  box-sizing: border-box;
 }
 
-.box {
-  max-width: 500px;
+body {
+  margin: 0;
+  background: #f6f6f6;
+  color: #222;
+  font-family: -apple-system, BlinkMacSystemFont,
+    "Helvetica Neue", Arial, sans-serif;
+}
+
+.container {
+  width: 100%;
+  max-width: 720px;
   margin: auto;
+  padding: 20px 14px 50px;
+}
+
+h1 {
+  text-align: center;
+  font-size: 27px;
+  margin: 10px 0 6px;
+}
+
+.subtitle {
+  text-align: center;
+  color: #777;
+  font-size: 14px;
+  margin-bottom: 25px;
+}
+
+.screen {
   background: white;
-  padding: 25px;
-  border-radius: 20px;
+  border-radius: 22px;
+  padding: 22px;
+  box-shadow: 0 5px 20px rgba(0,0,0,.08);
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* スタート */
+
+.mode {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
 }
 
 button {
-  width: 100%;
-  padding: 18px;
-  margin: 10px 0;
-  border: 0;
+  border: none;
   border-radius: 15px;
-  font-size: 18px;
+  padding: 16px;
+  font-size: 16px;
   font-weight: bold;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mode button:first-child {
   background: #222;
   color: white;
+}
+
+.mode button:last-child {
+  background: #e9e9e9;
+  color: #222;
+}
+
+.description {
+  margin-top: 20px;
+  font-size: 13px;
+  line-height: 1.7;
+  color: #777;
+}
+
+/* ゲーム */
+
+.round {
+  text-align: center;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.progress {
+  width: 100%;
+  height: 7px;
+  background: #eee;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.progressBar {
+  height: 100%;
+  width: 0%;
+  background: #222;
+  transition: width .2s;
+}
+
+.question {
+  text-align: center;
+  font-size: 21px;
+  font-weight: bold;
+  margin-bottom: 18px;
+}
+
+.choices {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.choice {
+  padding: 6px;
+  background: white;
+  border: 3px solid #eee;
+  border-radius: 18px;
+}
+
+.choice:active {
+  transform: scale(.98);
+}
+
+.choice img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: 12px;
+  background: #eee;
+}
+
+.choiceName {
+  text-align: center;
+  padding: 10px 3px 7px;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+/* 結果 */
+
+.resultTitle {
+  text-align: center;
+  font-size: 22px;
+  font-weight: bold;
+  margin-bottom: 15px;
+}
+
+#resultCanvas {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 10px;
+}
+
+.resultButtons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.resultButtons button:first-child {
+  background: #222;
+  color: white;
+}
+
+.resultButtons button:last-child {
+  background: #eee;
+}
+
+.restart {
+  width: 100%;
+  margin-top: 10px;
+  background: #eee;
+}
+
+.note {
+  margin-top: 17px;
+  color: #888;
+  font-size: 11px;
+  line-height: 1.7;
 }
 </style>
 </head>
 
 <body>
 
-<div class="box">
+<div class="container">
 
-  <h1>ハロプロ好き顔9選メーカー</h1>
+<h1>ハロプロ好き顔9選メーカー</h1>
 
-  <p>どのモードで遊ぶ？</p>
+<div class="subtitle">
+あなたは誰の顔が好き？
+</div>
 
-  <button onclick="startGame(100)">
-    STANDARD<br>
-    <small>100回</small>
-  </button>
 
-  <button onclick="startGame(200)">
-    ガチ<br>
-    <small>200回</small>
-  </button>
+<!-- ================================
+     START
+================================ -->
 
-  <div id="message"></div>
+<div id="startScreen" class="screen">
+
+  <h2>モードを選択</h2>
+
+  <div class="mode">
+
+    <button onclick="startGame(100)">
+      STANDARD<br>
+      <small>100回</small>
+    </button>
+
+    <button onclick="startGame(200)">
+      ガチ<br>
+      <small>200回</small>
+    </button>
+
+  </div>
+
+  <div class="description">
+
+    表示された2人の顔を見て、
+    「どっちの顔が好き？」と思った方を選択してください。
+
+    <br><br>
+
+    選択結果をElo方式で内部集計し、
+    最後にあなたの好き顔TOP9を決定します。
+
+    <br><br>
+
+    Eloの数値そのものは表示しません。
+
+  </div>
 
 </div>
 
+
+<!-- ================================
+     GAME
+================================ -->
+
+<div id="gameScreen" class="screen hidden">
+
+  <div id="roundText" class="round">
+    1 / 100
+  </div>
+
+  <div class="progress">
+    <div id="progressBar" class="progressBar"></div>
+  </div>
+
+  <div class="question">
+    どっちの顔が好き？
+  </div>
+
+  <div class="choices">
+
+    <button
+      id="choiceA"
+      class="choice"
+      onclick="choose(0)"
+    >
+
+      <img id="imageA" alt="候補A">
+
+      <div
+        id="nameA"
+        class="choiceName">
+      </div>
+
+    </button>
+
+
+    <button
+      id="choiceB"
+      class="choice"
+      onclick="choose(1)"
+    >
+
+      <img id="imageB" alt="候補B">
+
+      <div
+        id="nameB"
+        class="choiceName">
+      </div>
+
+    </button>
+
+  </div>
+
+</div>
+
+
+<!-- ================================
+     RESULT
+================================ -->
+
+<div id="resultScreen" class="screen hidden">
+
+  <div class="resultTitle">
+    あなたのハロプロ好き顔9選
+  </div>
+
+  <canvas
+    id="resultCanvas"
+    width="1080"
+    height="1080">
+  </canvas>
+
+  <div class="resultButtons">
+
+    <button onclick="saveResult()">
+      画像を保存
+    </button>
+
+    <button onclick="shareResult()">
+      共有する
+    </button>
+
+  </div>
+
+  <button
+    class="restart"
+    onclick="location.reload()">
+    もう一度遊ぶ
+  </button>
+
+  <div class="note">
+
+    ※このサイトは公式サービスではありません。<br>
+    ※画像の権利・利用条件をご確認のうえ、
+    保存・共有は各自の判断で行ってください。<br>
+    ※画像はブラウザ上で処理され、外部AIへ送信されません。
+
+  </div>
+
+</div>
+
+</div>
+
+
 <script>
+
+/* =================================================
+   ★★★ メンバー登録エリア ★★★
+
+   ここだけ編集すればOK。
+
+   image:
+   GitHubに置いた画像の場所
+
+   例：
+
+   images/member01.jpg
+
+   と書いた場合、
+
+   GitHub上では
+
+   images
+    └ member01.jpg
+
+   になっている必要があります。
+================================================= */
+
+const members = [
+
+  {
+    name: "野中美希",
+    image: "images/IMG_0780.jpeg"
+  },
+
+  {
+    name: "メンバー02",
+    image: "images/member02.jpg"
+  },
+
+  {
+    name: "メンバー03",
+    image: "images/member03.jpg"
+  },
+
+  {
+    name: "メンバー04",
+    image: "images/member04.jpg"
+  },
+
+  {
+    name: "メンバー05",
+    image: "images/member05.jpg"
+  },
+
+  {
+    name: "メンバー06",
+    image: "images/member06.jpg"
+  },
+
+  {
+    name: "メンバー07",
+    image: "images/member07.jpg"
+  },
+
+  {
+    name: "メンバー08",
+    image: "images/member08.jpg"
+  },
+
+  {
+    name: "メンバー09",
+    image: "images/member09.jpg"
+  },
+
+  {
+    name: "メンバー10",
+    image: "images/member10.jpg"
+  },
+
+  {
+    name: "メンバー11",
+    image: "images/member11.jpg"
+  },
+
+  {
+    name: "メンバー12",
+    image: "images/member12.jpg"
+  }
+
+];
+
+
+/* =================================================
+   ゲーム処理
+================================================= */
+
+let ratings = [];
+
+let totalRounds = 100;
+
+let currentRound = 0;
+
+let currentA = -1;
+
+let currentB = -1;
+
+
+/* Elo初期値 */
+
+function initializeRatings() {
+
+  ratings = [];
+
+  for (
+    let i = 0;
+    i < members.length;
+    i++
+  ) {
+
+    ratings.push(1000);
+
+  }
+
+}
+
+
+/* ゲーム開始 */
 
 function startGame(rounds) {
 
-  document.getElementById("message").textContent =
-    rounds + "回モードを選択しました！";
+  if (members.length < 2) {
+
+    alert(
+      "メンバーを2人以上登録してください。"
+    );
+
+    return;
+
+  }
+
+
+  totalRounds = rounds;
+
+  currentRound = 0;
+
+  initializeRatings();
+
+
+  document
+    .getElementById("startScreen")
+    .classList.add("hidden");
+
+
+  document
+    .getElementById("gameScreen")
+    .classList.remove("hidden");
+
+
+  nextMatch();
+
+}
+
+
+/* 二択を作る */
+
+function nextMatch() {
+
+  if (
+    currentRound >= totalRounds
+  ) {
+
+    finishGame();
+
+    return;
+
+  }
+
+
+  currentA =
+    Math.floor(
+      Math.random() * members.length
+    );
+
+
+  do {
+
+    currentB =
+      Math.floor(
+        Math.random() * members.length
+      );
+
+  }
+  while (
+    currentB === currentA
+  );
+
+
+  const a = members[currentA];
+
+  const b = members[currentB];
+
+
+  document
+    .getElementById("imageA")
+    .src = a.image;
+
+
+  document
+    .getElementById("imageB")
+    .src = b.image;
+
+
+  document
+    .getElementById("nameA")
+    .textContent = a.name;
+
+
+  document
+    .getElementById("nameB")
+    .textContent = b.name;
+
+
+  document
+    .getElementById("roundText")
+    .textContent =
+      `${currentRound + 1} / ${totalRounds}`;
+
+
+  document
+    .getElementById("progressBar")
+    .style.width =
+      `${(currentRound / totalRounds) * 100}%`;
+
+}
+
+
+/* 選択 */
+
+function choose(choice) {
+
+  let winner;
+
+  let loser;
+
+
+  if (choice === 0) {
+
+    winner = currentA;
+
+    loser = currentB;
+
+  }
+  else {
+
+    winner = currentB;
+
+    loser = currentA;
+
+  }
+
+
+  updateElo(
+    winner,
+    loser
+  );
+
+
+  currentRound++;
+
+  nextMatch();
+
+}
+
+
+/* Elo計算 */
+
+function updateElo(
+  winner,
+  loser
+) {
+
+  const K = 32;
+
+
+  const expectedWinner =
+    1 /
+    (
+      1 +
+      Math.pow(
+        10,
+        (
+          ratings[loser] -
+          ratings[winner]
+        ) / 400
+      )
+    );
+
+
+  const expectedLoser =
+    1 - expectedWinner;
+
+
+  ratings[winner] +=
+    K *
+    (1 - expectedWinner);
+
+
+  ratings[loser] +=
+    K *
+    (0 - expectedLoser);
+
+}
+
+
+/* =================================================
+   結果
+================================================= */
+
+function finishGame() {
+
+  document
+    .getElementById("gameScreen")
+    .classList.add("hidden");
+
+
+  document
+    .getElementById("resultScreen")
+    .classList.remove("hidden");
+
+
+  const ranking =
+    members
+      .map(
+        (member, index) => ({
+          index: index,
+          rating: ratings[index]
+        })
+      )
+      .sort(
+        (a, b) =>
+          b.rating - a.rating
+      );
+
+
+  const top9 =
+    ranking.slice(
+      0,
+      9
+    );
+
+
+  drawResult(top9);
+
+}
+
+
+/* 結果画像 */
+
+function drawResult(top9) {
+
+  const canvas =
+    document.getElementById(
+      "resultCanvas"
+    );
+
+  const ctx =
+    canvas.getContext("2d");
+
+
+  ctx.fillStyle =
+    "#ffffff";
+
+  ctx.fillRect(
+    0,
+    0,
+    1080,
+    1080
+  );
+
+
+  ctx.fillStyle =
+    "#111111";
+
+  ctx.textAlign =
+    "center";
+
+  ctx.font =
+    "bold 46px sans-serif";
+
+
+  ctx.fillText(
+    "ハロプロ好き顔9選",
+    540,
+    55
+  );
+
+
+  const size = 325;
+
+  const gap = 17;
+
+  const startX = 35;
+
+  const startY = 75;
+
+
+  top9.forEach(
+    (person, rank) => {
+
+      const img =
+        new Image();
+
+
+      img.onload =
+        function() {
+
+          const col =
+            rank % 3;
+
+          const row =
+            Math.floor(
+              rank / 3
+            );
+
+
+          const x =
+            startX +
+            col *
+            (size + gap);
+
+
+          const y =
+            startY +
+            row *
+            (size + gap);
+
+
+          const scale =
+            Math.max(
+              size / img.width,
+              size / img.height
+            );
+
+
+          const width =
+            img.width * scale;
+
+          const height =
+            img.height * scale;
+
+
+          ctx.save();
+
+          ctx.beginPath();
+
+          ctx.rect(
+            x,
+            y,
+            size,
+            size
+          );
+
+          ctx.clip();
+
+
+          ctx.drawImage(
+            img,
+            x +
+              (size - width) / 2,
+            y +
+              (size - height) / 2,
+            width,
+            height
+          );
+
+
+          ctx.restore();
+
+
+          /* #順位 */
+
+          ctx.fillStyle =
+            "rgba(0,0,0,.75)";
+
+          ctx.fillRect(
+            x,
+            y,
+            75,
+            55
+          );
+
+
+          ctx.fillStyle =
+            "#ffffff";
+
+          ctx.font =
+            "bold 30px sans-serif";
+
+
+          ctx.fillText(
+            `#${rank + 1}`,
+            x + 37,
+            y + 38
+          );
+
+
+          /* 名前 */
+
+          ctx.fillStyle =
+            "rgba(0,0,0,.75)";
+
+          ctx.fillRect(
+            x,
+            y + size - 45,
+            size,
+            45
+          );
+
+
+          ctx.fillStyle =
+            "#ffffff";
+
+          ctx.font =
+            "bold 18px sans-serif";
+
+
+          ctx.fillText(
+            members[
+              person.index
+            ].name,
+            x + size / 2,
+            y + size - 15
+          );
+
+        };
+
+
+      img.src =
+        members[
+          person.index
+        ].image;
+
+    }
+  );
+
+}
+
+
+/* 保存 */
+
+function saveResult() {
+
+  const canvas =
+    document.getElementById(
+      "resultCanvas"
+    );
+
+
+  const link =
+    document.createElement("a");
+
+
+  link.download =
+    "ハロプロ好き顔9選.png";
+
+
+  link.href =
+    canvas.toDataURL(
+      "image/png"
+    );
+
+
+  link.click();
+
+}
+
+
+/* スマホ共有 */
+
+async function shareResult() {
+
+  const canvas =
+    document.getElementById(
+      "resultCanvas"
+    );
+
+
+  canvas.toBlob(
+    async function(blob) {
+
+      const file =
+        new File(
+          [blob],
+          "ハロプロ好き顔9選.png",
+          {
+            type: "image/png"
+          }
+        );
+
+
+      if (
+        navigator.share &&
+        navigator.canShare &&
+        navigator.canShare({
+          files: [file]
+        })
+      ) {
+
+        try {
+
+          await navigator.share({
+            files: [file],
+            title:
+              "ハロプロ好き顔9選"
+          });
+
+        }
+        catch (error) {
+
+        }
+
+      }
+      else {
+
+        alert(
+          "画像を保存してから共有してください。"
+        );
+
+      }
+
+    },
+    "image/png"
+  );
 
 }
 
