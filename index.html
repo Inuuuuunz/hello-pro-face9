@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>ハロプロ好き顔9選メーカー</title>
 
 <style>
@@ -20,7 +19,6 @@ body {
 }
 
 .container {
-  width: 100%;
   max-width: 720px;
   margin: auto;
   padding: 20px 14px 50px;
@@ -50,42 +48,50 @@ h1 {
   display: none !important;
 }
 
-/* スタート */
+/* =========================
+   スタート
+========================= */
 
-.mode {
+.modeButtons {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 12px;
 }
 
-button {
+.modeButtons button {
   border: none;
   border-radius: 15px;
-  padding: 16px;
-  font-size: 16px;
+  padding: 17px;
+  font-size: 17px;
   font-weight: bold;
   cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
 }
 
-.mode button:first-child {
+.trial {
+  background: #eee;
+  color: #222;
+}
+
+.standard {
   background: #222;
   color: white;
 }
 
-.mode button:last-child {
-  background: #e9e9e9;
-  color: #222;
+.gachi {
+  background: #444;
+  color: white;
 }
 
 .description {
-  margin-top: 20px;
+  margin-top: 22px;
+  color: #777;
   font-size: 13px;
   line-height: 1.7;
-  color: #777;
 }
 
-/* ゲーム */
+/* =========================
+   ゲーム
+========================= */
 
 .round {
   text-align: center;
@@ -122,18 +128,19 @@ button {
   gap: 10px;
 }
 
-.choice {
+.faceChoice {
   padding: 6px;
   background: white;
   border: 3px solid #eee;
   border-radius: 18px;
+  cursor: pointer;
 }
 
-.choice:active {
+.faceChoice:active {
   transform: scale(.98);
 }
 
-.choice img {
+.faceChoice img {
   display: block;
   width: 100%;
   aspect-ratio: 1 / 1;
@@ -144,12 +151,39 @@ button {
 
 .choiceName {
   text-align: center;
-  padding: 10px 3px 7px;
+  padding: 9px 3px 2px;
   font-size: 14px;
   font-weight: bold;
 }
 
-/* 結果 */
+.choiceGroup {
+  text-align: center;
+  padding: 2px 3px 7px;
+  font-size: 11px;
+  color: #888;
+}
+
+.otherChoices {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.otherChoices button {
+  min-height: 58px;
+  border: none;
+  border-radius: 14px;
+  background: #eee;
+  color: #222;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+/* =========================
+   結果
+========================= */
 
 .resultTitle {
   text-align: center;
@@ -172,13 +206,21 @@ button {
   margin-top: 15px;
 }
 
-.resultButtons button:first-child {
+.resultButtons button {
+  border: none;
+  border-radius: 14px;
+  padding: 15px;
+  font-weight: bold;
+}
+
+.saveButton {
   background: #222;
   color: white;
 }
 
-.resultButtons button:last-child {
+.shareButton {
   background: #eee;
+  color: #222;
 }
 
 .restart {
@@ -207,23 +249,40 @@ button {
 </div>
 
 
-<!-- ================================
-     START
-================================ -->
+<!-- =========================
+     スタート
+========================= -->
 
 <div id="startScreen" class="screen">
 
-  <h2>モードを選択</h2>
+  <h2>コースを選択</h2>
 
-  <div class="mode">
+  <div class="modeButtons">
 
-    <button onclick="startGame(100)">
-      STANDARD<br>
+    <button
+      class="trial"
+      onclick="startGame(50)"
+    >
+      お試し
+      <br>
+      <small>50回</small>
+    </button>
+
+    <button
+      class="standard"
+      onclick="startGame(100)"
+    >
+      STANDARD
+      <br>
       <small>100回</small>
     </button>
 
-    <button onclick="startGame(200)">
-      ガチ<br>
+    <button
+      class="gachi"
+      onclick="startGame(200)"
+    >
+      ガチ
+      <br>
       <small>200回</small>
     </button>
 
@@ -232,53 +291,71 @@ button {
   <div class="description">
 
     表示された2人の顔を見て、
-    「どっちの顔が好き？」と思った方を選択してください。
+    あなたの感覚に一番近い選択肢を選んでください。
 
     <br><br>
 
-    選択結果をElo方式で内部集計し、
-    最後にあなたの好き顔TOP9を決定します。
+    「どっちの顔が好き？」<br>
+    「どちらでもない」<br>
+    「どっちも好き」
 
     <br><br>
 
-    Eloの数値そのものは表示しません。
+    選択結果は内部でElo方式により集計され、
+    最後にあなたの「好き顔9選」を決定します。
+
+    <br><br>
+
+    ※Eloの数値そのものは表示されません。
 
   </div>
 
 </div>
 
 
-<!-- ================================
-     GAME
-================================ -->
+<!-- =========================
+     ゲーム
+========================= -->
 
 <div id="gameScreen" class="screen hidden">
 
   <div id="roundText" class="round">
-    1 / 100
+    1 / 50
   </div>
 
   <div class="progress">
-    <div id="progressBar" class="progressBar"></div>
+    <div
+      id="progressBar"
+      class="progressBar">
+    </div>
   </div>
 
   <div class="question">
     どっちの顔が好き？
   </div>
 
+
   <div class="choices">
 
     <button
       id="choiceA"
-      class="choice"
-      onclick="choose(0)"
+      class="faceChoice"
+      onclick="chooseLeft()"
     >
 
-      <img id="imageA" alt="候補A">
+      <img
+        id="imageA"
+        alt="左の候補"
+      >
 
       <div
         id="nameA"
         class="choiceName">
+      </div>
+
+      <div
+        id="groupA"
+        class="choiceGroup">
       </div>
 
     </button>
@@ -286,17 +363,38 @@ button {
 
     <button
       id="choiceB"
-      class="choice"
-      onclick="choose(1)"
+      class="faceChoice"
+      onclick="chooseRight()"
     >
 
-      <img id="imageB" alt="候補B">
+      <img
+        id="imageB"
+        alt="右の候補"
+      >
 
       <div
         id="nameB"
         class="choiceName">
       </div>
 
+      <div
+        id="groupB"
+        class="choiceGroup">
+      </div>
+
+    </button>
+
+  </div>
+
+
+  <div class="otherChoices">
+
+    <button onclick="chooseNeither()">
+      どちらでもない
+    </button>
+
+    <button onclick="chooseBoth()">
+      どっちも好き
     </button>
 
   </div>
@@ -304,9 +402,9 @@ button {
 </div>
 
 
-<!-- ================================
-     RESULT
-================================ -->
+<!-- =========================
+     結果
+========================= -->
 
 <div id="resultScreen" class="screen hidden">
 
@@ -322,11 +420,15 @@ button {
 
   <div class="resultButtons">
 
-    <button onclick="saveResult()">
+    <button
+      class="saveButton"
+      onclick="saveResult()">
       画像を保存
     </button>
 
-    <button onclick="shareResult()">
+    <button
+      class="shareButton"
+      onclick="shareResult()">
       共有する
     </button>
 
@@ -343,7 +445,8 @@ button {
     ※このサイトは公式サービスではありません。<br>
     ※画像の権利・利用条件をご確認のうえ、
     保存・共有は各自の判断で行ってください。<br>
-    ※画像はブラウザ上で処理され、外部AIへ送信されません。
+    ※画像はブラウザ上で処理され、
+    外部AIへ送信されません。
 
   </div>
 
@@ -354,100 +457,102 @@ button {
 
 <script>
 
-/* =================================================
-   ★★★ メンバー登録エリア ★★★
-
-   ここだけ編集すればOK。
-
-   image:
-   GitHubに置いた画像の場所
-
-   例：
-
-   images/member01.jpg
-
-   と書いた場合、
-
-   GitHub上では
-
-   images
-    └ member01.jpg
-
-   になっている必要があります。
-================================================= */
+/* =====================================================
+   ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+   ★
+   ★  ここだけあなたが入力する
+   ★
+   ★  69人分
+   ★
+   ★  name  = メンバー名
+   ★  group = グループ名
+   ★  image = GitHub上の画像ファイル
+   ★
+   ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+*/
 
 const members = [
 
-  {
-    name: "野中美希",
-    image: "images/IMG_0780.jpeg"
-  },
-
-  {
-    name: "メンバー02",
-    image: "images/member02.jpg"
-  },
-
-  {
-    name: "メンバー03",
-    image: "images/member03.jpg"
-  },
-
-  {
-    name: "メンバー04",
-    image: "images/member04.jpg"
-  },
-
-  {
-    name: "メンバー05",
-    image: "images/member05.jpg"
-  },
-
-  {
-    name: "メンバー06",
-    image: "images/member06.jpg"
-  },
-
-  {
-    name: "メンバー07",
-    image: "images/member07.jpg"
-  },
-
-  {
-    name: "メンバー08",
-    image: "images/member08.jpg"
-  },
-
-  {
-    name: "メンバー09",
-    image: "images/member09.jpg"
-  },
-
-  {
-    name: "メンバー10",
-    image: "images/member10.jpg"
-  },
-
-  {
-    name: "メンバー11",
-    image: "images/member11.jpg"
-  },
-
-  {
-    name: "メンバー12",
-    image: "images/member12.jpg"
-  }
+  { name: "", group: "", image: "images/IMG_0001.jpeg" },
+  { name: "", group: "", image: "images/IMG_0002.jpeg" },
+  { name: "", group: "", image: "images/IMG_0003.jpeg" },
+  { name: "", group: "", image: "images/IMG_0004.jpeg" },
+  { name: "", group: "", image: "images/IMG_0005.jpeg" },
+  { name: "", group: "", image: "images/IMG_0006.jpeg" },
+  { name: "", group: "", image: "images/IMG_0007.jpeg" },
+  { name: "", group: "", image: "images/IMG_0008.jpeg" },
+  { name: "", group: "", image: "images/IMG_0009.jpeg" },
+  { name: "", group: "", image: "images/IMG_0010.jpeg" },
+  { name: "", group: "", image: "images/IMG_0011.jpeg" },
+  { name: "", group: "", image: "images/IMG_0012.jpeg" },
+  { name: "", group: "", image: "images/IMG_0013.jpeg" },
+  { name: "", group: "", image: "images/IMG_0014.jpeg" },
+  { name: "", group: "", image: "images/IMG_0015.jpeg" },
+  { name: "", group: "", image: "images/IMG_0016.jpeg" },
+  { name: "", group: "", image: "images/IMG_0017.jpeg" },
+  { name: "", group: "", image: "images/IMG_0018.jpeg" },
+  { name: "", group: "", image: "images/IMG_0019.jpeg" },
+  { name: "", group: "", image: "images/IMG_0020.jpeg" },
+  { name: "", group: "", image: "images/IMG_0021.jpeg" },
+  { name: "", group: "", image: "images/IMG_0022.jpeg" },
+  { name: "", group: "", image: "images/IMG_0023.jpeg" },
+  { name: "", group: "", image: "images/IMG_0024.jpeg" },
+  { name: "", group: "", image: "images/IMG_0025.jpeg" },
+  { name: "", group: "", image: "images/IMG_0026.jpeg" },
+  { name: "", group: "", image: "images/IMG_0027.jpeg" },
+  { name: "", group: "", image: "images/IMG_0028.jpeg" },
+  { name: "", group: "", image: "images/IMG_0029.jpeg" },
+  { name: "", group: "", image: "images/IMG_0030.jpeg" },
+  { name: "", group: "", image: "images/IMG_0031.jpeg" },
+  { name: "", group: "", image: "images/IMG_0032.jpeg" },
+  { name: "", group: "", image: "images/IMG_0033.jpeg" },
+  { name: "", group: "", image: "images/IMG_0034.jpeg" },
+  { name: "", group: "", image: "images/IMG_0035.jpeg" },
+  { name: "", group: "", image: "images/IMG_0036.jpeg" },
+  { name: "", group: "", image: "images/IMG_0037.jpeg" },
+  { name: "", group: "", image: "images/IMG_0038.jpeg" },
+  { name: "", group: "", image: "images/IMG_0039.jpeg" },
+  { name: "", group: "", image: "images/IMG_0040.jpeg" },
+  { name: "", group: "", image: "images/IMG_0041.jpeg" },
+  { name: "", group: "", image: "images/IMG_0042.jpeg" },
+  { name: "", group: "", image: "images/IMG_0043.jpeg" },
+  { name: "", group: "", image: "images/IMG_0044.jpeg" },
+  { name: "", group: "", image: "images/IMG_0045.jpeg" },
+  { name: "", group: "", image: "images/IMG_0046.jpeg" },
+  { name: "", group: "", image: "images/IMG_0047.jpeg" },
+  { name: "", group: "", image: "images/IMG_0048.jpeg" },
+  { name: "", group: "", image: "images/IMG_0049.jpeg" },
+  { name: "", group: "", image: "images/IMG_0050.jpeg" },
+  { name: "", group: "", image: "images/IMG_0051.jpeg" },
+  { name: "", group: "", image: "images/IMG_0052.jpeg" },
+  { name: "", group: "", image: "images/IMG_0053.jpeg" },
+  { name: "", group: "", image: "images/IMG_0054.jpeg" },
+  { name: "", group: "", image: "images/IMG_0055.jpeg" },
+  { name: "", group: "", image: "images/IMG_0056.jpeg" },
+  { name: "", group: "", image: "images/IMG_0057.jpeg" },
+  { name: "", group: "", image: "images/IMG_0058.jpeg" },
+  { name: "", group: "", image: "images/IMG_0059.jpeg" },
+  { name: "", group: "", image: "images/IMG_0060.jpeg" },
+  { name: "", group: "", image: "images/IMG_0061.jpeg" },
+  { name: "", group: "", image: "images/IMG_0062.jpeg" },
+  { name: "", group: "", image: "images/IMG_0063.jpeg" },
+  { name: "", group: "", image: "images/IMG_0064.jpeg" },
+  { name: "", group: "", image: "images/IMG_0065.jpeg" },
+  { name: "", group: "", image: "images/IMG_0066.jpeg" },
+  { name: "", group: "", image: "images/IMG_0067.jpeg" },
+  { name: "", group: "", image: "images/IMG_0068.jpeg" },
+  { name: "", group: "", image: "images/IMG_0069.jpeg" }
 
 ];
 
 
-/* =================================================
-   ゲーム処理
-================================================= */
+/* =====================================================
+   ゲーム変数
+===================================================== */
 
 let ratings = [];
 
-let totalRounds = 100;
+let totalRounds = 50;
 
 let currentRound = 0;
 
@@ -456,7 +561,9 @@ let currentA = -1;
 let currentB = -1;
 
 
-/* Elo初期値 */
+/* =====================================================
+   Elo初期化
+===================================================== */
 
 function initializeRatings() {
 
@@ -475,18 +582,19 @@ function initializeRatings() {
 }
 
 
-/* ゲーム開始 */
+/* =====================================================
+   ゲーム開始
+===================================================== */
 
 function startGame(rounds) {
 
   if (members.length < 2) {
 
     alert(
-      "メンバーを2人以上登録してください。"
+      "候補者を2人以上登録してください。"
     );
 
     return;
-
   }
 
 
@@ -512,7 +620,9 @@ function startGame(rounds) {
 }
 
 
-/* 二択を作る */
+/* =====================================================
+   次の対戦
+===================================================== */
 
 function nextMatch() {
 
@@ -546,9 +656,11 @@ function nextMatch() {
   );
 
 
-  const a = members[currentA];
+  const a =
+    members[currentA];
 
-  const b = members[currentB];
+  const b =
+    members[currentB];
 
 
   document
@@ -572,6 +684,16 @@ function nextMatch() {
 
 
   document
+    .getElementById("groupA")
+    .textContent = a.group;
+
+
+  document
+    .getElementById("groupB")
+    .textContent = b.group;
+
+
+  document
     .getElementById("roundText")
     .textContent =
       `${currentRound + 1} / ${totalRounds}`;
@@ -585,36 +707,70 @@ function nextMatch() {
 }
 
 
-/* 選択 */
+/* =====================================================
+   左が好き
+===================================================== */
 
-function choose(choice) {
-
-  let winner;
-
-  let loser;
-
-
-  if (choice === 0) {
-
-    winner = currentA;
-
-    loser = currentB;
-
-  }
-  else {
-
-    winner = currentB;
-
-    loser = currentA;
-
-  }
-
+function chooseLeft() {
 
   updateElo(
-    winner,
-    loser
+    currentA,
+    currentB
   );
 
+  nextRound();
+
+}
+
+
+/* =====================================================
+   右が好き
+===================================================== */
+
+function chooseRight() {
+
+  updateElo(
+    currentB,
+    currentA
+  );
+
+  nextRound();
+
+}
+
+
+/* =====================================================
+   どちらでもない
+
+   勝敗をつけない
+===================================================== */
+
+function chooseNeither() {
+
+  nextRound();
+
+}
+
+
+/* =====================================================
+   どっちも好き
+
+   両者に同程度の評価を与える
+   → Eloは変化させない
+===================================================== */
+
+function chooseBoth() {
+
+  nextRound();
+
+}
+
+
+/* =====================================================
+   次のラウンド
+===================================================== */
+
+function nextRound() {
 
   currentRound++;
 
@@ -623,7 +779,9 @@ function choose(choice) {
 }
 
 
-/* Elo計算 */
+/* =====================================================
+   Elo計算
+===================================================== */
 
 function updateElo(
   winner,
@@ -663,9 +821,9 @@ function updateElo(
 }
 
 
-/* =================================================
+/* =====================================================
    結果
-================================================= */
+===================================================== */
 
 function finishGame() {
 
@@ -694,10 +852,7 @@ function finishGame() {
 
 
   const top9 =
-    ranking.slice(
-      0,
-      9
-    );
+    ranking.slice(0, 9);
 
 
   drawResult(top9);
@@ -705,7 +860,9 @@ function finishGame() {
 }
 
 
-/* 結果画像 */
+/* =====================================================
+   結果画像
+===================================================== */
 
 function drawResult(top9) {
 
@@ -742,7 +899,7 @@ function drawResult(top9) {
   ctx.fillText(
     "ハロプロ好き顔9選",
     540,
-    55
+    52
   );
 
 
@@ -752,7 +909,7 @@ function drawResult(top9) {
 
   const startX = 35;
 
-  const startY = 75;
+  const startY = 70;
 
 
   top9.forEach(
@@ -828,7 +985,7 @@ function drawResult(top9) {
           ctx.restore();
 
 
-          /* #順位 */
+          /* 順位 */
 
           ctx.fillStyle =
             "rgba(0,0,0,.75)";
@@ -836,8 +993,8 @@ function drawResult(top9) {
           ctx.fillRect(
             x,
             y,
-            75,
-            55
+            70,
+            52
           );
 
 
@@ -850,21 +1007,21 @@ function drawResult(top9) {
 
           ctx.fillText(
             `#${rank + 1}`,
-            x + 37,
-            y + 38
+            x + 35,
+            y + 36
           );
 
 
-          /* 名前 */
+          /* 名前・グループ */
 
           ctx.fillStyle =
-            "rgba(0,0,0,.75)";
+            "rgba(0,0,0,.78)";
 
           ctx.fillRect(
             x,
-            y + size - 45,
+            y + size - 55,
             size,
-            45
+            55
           );
 
 
@@ -872,7 +1029,7 @@ function drawResult(top9) {
             "#ffffff";
 
           ctx.font =
-            "bold 18px sans-serif";
+            "bold 17px sans-serif";
 
 
           ctx.fillText(
@@ -880,7 +1037,20 @@ function drawResult(top9) {
               person.index
             ].name,
             x + size / 2,
-            y + size - 15
+            y + size - 32
+          );
+
+
+          ctx.font =
+            "12px sans-serif";
+
+
+          ctx.fillText(
+            members[
+              person.index
+            ].group,
+            x + size / 2,
+            y + size - 13
           );
 
         };
@@ -897,7 +1067,9 @@ function drawResult(top9) {
 }
 
 
-/* 保存 */
+/* =====================================================
+   保存
+===================================================== */
 
 function saveResult() {
 
@@ -926,7 +1098,9 @@ function saveResult() {
 }
 
 
-/* スマホ共有 */
+/* =====================================================
+   共有
+===================================================== */
 
 async function shareResult() {
 
@@ -974,7 +1148,7 @@ async function shareResult() {
       else {
 
         alert(
-          "画像を保存してから共有してください。"
+          "まず画像を保存してから共有してください。"
         );
 
       }
