@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ハロプロ好き顔9選メーカー</title>
+<title>💎 ハロプロ好き顔9選メーカー</title>
 
 <style>
 * {
@@ -16,6 +16,8 @@ body {
   color: #222;
   font-family: -apple-system, BlinkMacSystemFont,
     "Helvetica Neue", Arial, sans-serif;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 .container {
@@ -86,7 +88,21 @@ h1 {
   margin-top: 22px;
   color: #777;
   font-size: 13px;
-  line-height: 1.7;
+  line-height: 1.75;
+}
+
+.tipBox {
+  margin-top: 20px;
+  padding: 16px;
+  background: #f7f7f7;
+  border-radius: 15px;
+}
+
+.tipTitle {
+  font-size: 16px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 10px;
 }
 
 /* =========================
@@ -134,6 +150,8 @@ h1 {
   border: 3px solid #eee;
   border-radius: 18px;
   cursor: pointer;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 .faceChoice:active {
@@ -147,6 +165,9 @@ h1 {
   object-fit: cover;
   border-radius: 12px;
   background: #eee;
+  -webkit-user-drag: none;
+  user-drag: none;
+  pointer-events: none;
 }
 
 .choiceName {
@@ -181,6 +202,29 @@ h1 {
   cursor: pointer;
 }
 
+.navigationButtons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.navigationButtons button {
+  min-height: 50px;
+  border: none;
+  border-radius: 14px;
+  background: #eee;
+  color: #222;
+  font-size: 13px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.navigationButtons button:disabled {
+  opacity: .4;
+  cursor: default;
+}
+
 /* =========================
    結果
 ========================= */
@@ -197,36 +241,18 @@ h1 {
   height: auto;
   display: block;
   border-radius: 10px;
-}
-
-.resultButtons {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  margin-top: 15px;
-}
-
-.resultButtons button {
-  border: none;
-  border-radius: 14px;
-  padding: 15px;
-  font-weight: bold;
-}
-
-.saveButton {
-  background: #222;
-  color: white;
-}
-
-.shareButton {
-  background: #eee;
-  color: #222;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 .restart {
   width: 100%;
-  margin-top: 10px;
+  margin-top: 14px;
   background: #eee;
+  border: none;
+  border-radius: 14px;
+  padding: 15px;
+  font-weight: bold;
 }
 
 .note {
@@ -235,6 +261,34 @@ h1 {
   font-size: 11px;
   line-height: 1.7;
 }
+
+/* =========================
+   スマホ
+========================= */
+
+@media (max-width: 480px) {
+
+  .container {
+    padding: 14px 10px 40px;
+  }
+
+  .screen {
+    padding: 17px;
+  }
+
+  h1 {
+    font-size: 24px;
+  }
+
+  .question {
+    font-size: 19px;
+  }
+
+  .choiceName {
+    font-size: 13px;
+  }
+
+}
 </style>
 </head>
 
@@ -242,10 +296,10 @@ h1 {
 
 <div class="container">
 
-<h1>ハロプロ好き顔9選メーカー</h1>
+<h1>💎 ハロプロ好き顔9選メーカー</h1>
 
 <div class="subtitle">
-あなたは誰の顔が好き？
+あなたは誰の顔が好き？ 👀
 </div>
 
 
@@ -263,7 +317,7 @@ h1 {
       class="trial"
       onclick="startGame(50)"
     >
-      お試し
+      🧪 お試し
       <br>
       <small>50回</small>
     </button>
@@ -272,7 +326,7 @@ h1 {
       class="standard"
       onclick="startGame(100)"
     >
-      STANDARD
+      ⭐ STANDARD
       <br>
       <small>100回</small>
     </button>
@@ -281,32 +335,78 @@ h1 {
       class="gachi"
       onclick="startGame(200)"
     >
-      ガチ
+      🔥 ガチ
       <br>
       <small>200回</small>
     </button>
 
   </div>
 
+
   <div class="description">
 
+    <b>👀 遊び方</b><br>
+
     表示された2人の顔を見て、
-    あなたの感覚に一番近い選択肢を選んでください。
+    あなたが「顔が好き」と感じる方を選んでください。
 
     <br><br>
 
-    「どっちの顔が好き？」<br>
-    「どちらでもない」<br>
-    「どっちも好き」
+    「どちらでもない」は、
+    どちらも特に好みではないときに。
 
-    <br><br>
+    <br>
 
-    選択結果は内部でElo方式により集計され、
+    「どっちも好き」は、
+    本当に両方好きなときに選んでください。
+
+
+    <div class="tipBox">
+
+      <div class="tipTitle">
+        🎯 好き顔の精度を上げるコツ
+      </div>
+
+      <b>① 直感で選ぶ 👀</b><br>
+      「こっちの顔が好き！」と思った方を
+      素直に選ぶのがおすすめです。
+
+      <br><br>
+
+      <b>② 「どっちも好き」を使いすぎない 💕</b><br>
+      本当に両方好きなときに使うと、
+      あなたの好みがより反映されやすくなります。
+
+      <br><br>
+
+      <b>③ 「どちらでもない」も正直に 🙅‍♂️</b><br>
+      無理にどちらかを選ぶ必要はありません。
+
+      <br><br>
+
+      <b>④ 回数が多いほど比較できます 📈</b><br>
+      50回 → 気軽にお試し<br>
+      100回 → しっかり比較<br>
+      200回 → より細かく比較
+
+      <br><br>
+
+      <b>⑤ 名前ではなく顔で選ぶ 👤</b><br>
+      「誰だから」ではなく、
+      表示された顔そのものを見て選ぶと、
+      好き顔に特化した結果になりやすくなります。
+
+    </div>
+
+
+    <br>
+
+    ※選択結果は内部でElo方式により集計され、
     最後にあなたの「好き顔9選」を決定します。
 
     <br><br>
 
-    ※Eloの数値そのものは表示されません。
+    ※このサイトは公式サービスではありません。
 
   </div>
 
@@ -331,7 +431,7 @@ h1 {
   </div>
 
   <div class="question">
-    どっちの顔が好き？
+    どっちの顔が好き？ 👀
   </div>
 
 
@@ -346,6 +446,7 @@ h1 {
       <img
         id="imageA"
         alt="左の候補"
+        draggable="false"
       >
 
       <div
@@ -370,6 +471,7 @@ h1 {
       <img
         id="imageB"
         alt="右の候補"
+        draggable="false"
       >
 
       <div
@@ -394,7 +496,24 @@ h1 {
     </button>
 
     <button onclick="chooseBoth()">
-      どっちも好き
+      どっちも好き 💕
+    </button>
+
+  </div>
+
+
+  <div class="navigationButtons">
+
+    <button
+      id="backButton"
+      onclick="goBack()"
+      disabled>
+      ↩️ 1つ前に戻る
+    </button>
+
+    <button
+      onclick="goHome()">
+      🏠 トップに戻る
     </button>
 
   </div>
@@ -409,7 +528,7 @@ h1 {
 <div id="resultScreen" class="screen hidden">
 
   <div class="resultTitle">
-    あなたのハロプロ好き顔9選
+    💎 あなたのハロプロ好き顔9選
   </div>
 
   <canvas
@@ -418,35 +537,33 @@ h1 {
     height="1080">
   </canvas>
 
-  <div class="resultButtons">
-
-    <button
-      class="saveButton"
-      onclick="saveResult()">
-      画像を保存
-    </button>
-
-    <button
-      class="shareButton"
-      onclick="shareResult()">
-      共有する
-    </button>
-
-  </div>
 
   <button
     class="restart"
-    onclick="location.reload()">
-    もう一度遊ぶ
+    onclick="restartGame()">
+    🔄 もう一度遊ぶ
   </button>
+
 
   <div class="note">
 
-    ※このサイトは公式サービスではありません。<br>
-    ※画像の権利・利用条件をご確認のうえ、
-    保存・共有は各自の判断で行ってください。<br>
-    ※画像はブラウザ上で処理され、
-    外部AIへ送信されません。
+    📱 結果はスクリーンショットなどで
+    各自保存してください。
+
+    <br><br>
+
+    このサイトから画像ファイルの
+    ダウンロード・共有機能は提供していません。
+
+    <br><br>
+
+    ※画像の利用・保存・共有については、
+    各自で権利関係をご確認のうえ、
+    個人の判断でお楽しみください。
+
+    <br><br>
+
+    ※このサイトは公式サービスではありません。
 
   </div>
 
@@ -458,18 +575,8 @@ h1 {
 <script>
 
 /* =====================================================
-   ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
-   ★
-   ★  ここだけあなたが入力する
-   ★
-   ★  69人分
-   ★
-   ★  name  = メンバー名
-   ★  group = グループ名
-   ★  image = GitHub上の画像ファイル
-   ★
-   ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
-*/
+   メンバー情報
+===================================================== */
 
 const members = [
 
@@ -484,6 +591,7 @@ const members = [
   { name: "安田美結", group: "モーニング娘｡'26", image: "IMG_0789.jpeg" },
   { name: "鈴木もあ", group: "モーニング娘｡'26", image: "IMG_0790.jpeg" },
   { name: "石川華望", group: "モーニング娘｡'26", image: "IMG_0791.jpeg" },
+
   { name: "伊勢鈴蘭", group: "アンジュルム", image: "IMG_0792.jpeg" },
   { name: "為永幸音", group: "アンジュルム", image: "IMG_0793.jpeg" },
   { name: "橋迫鈴", group: "アンジュルム", image: "IMG_0794.jpeg" },
@@ -493,6 +601,7 @@ const members = [
   { name: "下井谷幸穂", group: "アンジュルム", image: "IMG_0798.jpeg" },
   { name: "後藤花", group: "アンジュルム", image: "IMG_0799.jpeg" },
   { name: "長野桃羽", group: "アンジュルム", image: "IMG_0800.jpeg" },
+
   { name: "段原瑠々", group: "Juice=Juice", image: "IMG_0801.jpeg" },
   { name: "井上玲音", group: "Juice=Juice", image: "IMG_0802.jpeg" },
   { name: "工藤由愛", group: "Juice=Juice", image: "IMG_0803.jpeg" },
@@ -504,6 +613,7 @@ const members = [
   { name: "遠藤彩加里", group: "Juice=Juice", image: "IMG_0809.jpeg" },
   { name: "川嶋美楓", group: "Juice=Juice", image: "IMG_0810.jpeg" },
   { name: "林仁愛", group: "Juice=Juice", image: "IMG_0811.jpeg" },
+
   { name: "谷本安美", group: "つばきファクトリー", image: "IMG_0812.jpeg" },
   { name: "小野瑞歩", group: "つばきファクトリー", image: "IMG_0813.jpeg" },
   { name: "小野田紗栞", group: "つばきファクトリー", image: "IMG_0814.jpeg" },
@@ -515,6 +625,7 @@ const members = [
   { name: "村田結生", group: "つばきファクトリー", image: "IMG_0820.jpeg" },
   { name: "土居楓奏", group: "つばきファクトリー", image: "IMG_0821.jpeg" },
   { name: "西村乙輝", group: "つばきファクトリー", image: "IMG_0822.jpeg" },
+
   { name: "西田汐里", group: "BEYOOOOONDS", image: "IMG_0823.jpeg" },
   { name: "江口紗耶", group: "BEYOOOOONDS", image: "IMG_0824.jpeg" },
   { name: "大坪茉乃", group: "BEYOOOOONDS", image: "IMG_0825.jpeg" },
@@ -526,6 +637,7 @@ const members = [
   { name: "平井美葉", group: "BEYOOOOONDS", image: "IMG_0831.jpeg" },
   { name: "小林萌花", group: "BEYOOOOONDS", image: "IMG_0832.jpeg" },
   { name: "里吉うたの", group: "BEYOOOOONDS", image: "IMG_0833.jpeg" },
+
   { name: "斉藤円香", group: "OCHANORMA", image: "IMG_0834.jpeg" },
   { name: "広本瑠璃", group: "OCHANORMA", image: "IMG_0835.jpeg" },
   { name: "米村姫良々", group: "OCHANORMA", image: "IMG_0836.jpeg" },
@@ -534,6 +646,7 @@ const members = [
   { name: "西﨑美空", group: "OCHANORMA", image: "IMG_0839.jpeg" },
   { name: "北原もも", group: "OCHANORMA", image: "IMG_0840.jpeg" },
   { name: "筒井澪心", group: "OCHANORMA", image: "IMG_0841.jpeg" },
+
   { name: "橋田歩果", group: "ロージークロニクル", image: "IMG_0842.jpeg" },
   { name: "吉田姫杷", group: "ロージークロニクル", image: "IMG_0843.jpeg" },
   { name: "小野田華凜", group: "ロージークロニクル", image: "IMG_0844.jpeg" },
@@ -543,7 +656,7 @@ const members = [
   { name: "島川波菜", group: "ロージークロニクル", image: "IMG_0848.jpeg" },
   { name: "上村麗菜", group: "ロージークロニクル", image: "IMG_0849.jpeg" },
   { name: "相馬優芽", group: "ロージークロニクル", image: "IMG_0850.jpeg" }
-  
+
 ];
 
 
@@ -553,6 +666,8 @@ const members = [
 
 let ratings = [];
 
+let matchCounts = [];
+
 let totalRounds = 50;
 
 let currentRound = 0;
@@ -560,6 +675,51 @@ let currentRound = 0;
 let currentA = -1;
 
 let currentB = -1;
+
+/*
+  未出・比較回数の少ないメンバーを
+  優先的に登場させるためのキュー
+*/
+let candidateQueue = [];
+
+/*
+  「1つ前に戻る」のための履歴
+*/
+let history = [];
+
+
+/* =====================================================
+   シャッフル
+===================================================== */
+
+function shuffle(array) {
+
+  const copied = [...array];
+
+  for (
+    let i = copied.length - 1;
+    i > 0;
+    i--
+  ) {
+
+    const j =
+      Math.floor(
+        Math.random() * (i + 1)
+      );
+
+    [
+      copied[i],
+      copied[j]
+    ] = [
+      copied[j],
+      copied[i]
+    ];
+
+  }
+
+  return copied;
+
+}
 
 
 /* =====================================================
@@ -570,6 +730,8 @@ function initializeRatings() {
 
   ratings = [];
 
+  matchCounts = [];
+
   for (
     let i = 0;
     i < members.length;
@@ -578,7 +740,215 @@ function initializeRatings() {
 
     ratings.push(1000);
 
+    matchCounts.push(0);
+
   }
+
+  /*
+    最初は全員をシャッフルして、
+    できるだけ全員が登場するようにする。
+  */
+  candidateQueue =
+    shuffle(
+      Array.from(
+        {
+          length: members.length
+        },
+        (_, index) => index
+      )
+    );
+
+  history = [];
+
+}
+
+
+/* =====================================================
+   候補者取得
+===================================================== */
+
+function getCandidate() {
+
+  /*
+    キューに残っている人を優先。
+    これにより、最初の約35ラウンドで
+    69〜70人をなるべく一度ずつ登場させる。
+  */
+
+  if (candidateQueue.length > 0) {
+
+    return candidateQueue.shift();
+
+  }
+
+
+  /*
+    キューが空になったら、
+    比較回数が少ない人を優先。
+  */
+
+  let minimum =
+    Math.min(
+      ...matchCounts
+    );
+
+
+  let candidates = [];
+
+  for (
+    let i = 0;
+    i < members.length;
+    i++
+  ) {
+
+    if (
+      matchCounts[i] === minimum
+    ) {
+
+      candidates.push(i);
+
+    }
+
+  }
+
+
+  return candidates[
+    Math.floor(
+      Math.random() *
+      candidates.length
+    )
+  ];
+
+}
+
+
+/* =====================================================
+   精度重視の対戦相手選択
+===================================================== */
+
+function getOpponent(indexA) {
+
+  /*
+    比較回数が少ない人を優先しつつ、
+    後半は現在のEloが近い相手を選ぶ。
+
+    これによって、
+    「どちらが好きか迷いやすい人同士」を
+    比較する機会を増やす。
+  */
+
+  const available = [];
+
+  for (
+    let i = 0;
+    i < members.length;
+    i++
+  ) {
+
+    if (
+      i !== indexA
+    ) {
+
+      available.push(i);
+
+    }
+
+  }
+
+
+  const minimum =
+    Math.min(
+      ...available.map(
+        i => matchCounts[i]
+      )
+    );
+
+
+  const lowCount =
+    available.filter(
+      i =>
+        matchCounts[i] === minimum
+    );
+
+
+  /*
+    最初の段階では、
+    比較回数の少ない人から選ぶ。
+  */
+
+  if (
+    currentRound <
+    members.length * 0.5
+  ) {
+
+    return lowCount[
+      Math.floor(
+        Math.random() *
+        lowCount.length
+      )
+    ];
+
+  }
+
+
+  /*
+    後半はEloが近い相手を選ぶ。
+  */
+
+  let pool =
+    available;
+
+
+  /*
+    あまり比較されていない人を
+    少し優先する。
+  */
+
+  pool =
+    pool
+      .sort(
+        (a, b) => {
+
+          const countDifference =
+            matchCounts[a] -
+            matchCounts[b];
+
+          if (
+            countDifference !== 0
+          ) {
+
+            return countDifference;
+
+          }
+
+          return (
+            Math.abs(
+              ratings[a] -
+              ratings[indexA]
+            ) -
+            Math.abs(
+              ratings[b] -
+              ratings[indexA]
+            )
+          );
+
+        }
+      )
+      .slice(
+        0,
+        Math.min(
+          12,
+          pool.length
+        )
+      );
+
+
+  return pool[
+    Math.floor(
+      Math.random() *
+      pool.length
+    )
+  ];
 
 }
 
@@ -589,13 +959,16 @@ function initializeRatings() {
 
 function startGame(rounds) {
 
-  if (members.length < 2) {
+  if (
+    members.length < 2
+  ) {
 
     alert(
       "候補者を2人以上登録してください。"
     );
 
     return;
+
   }
 
 
@@ -615,6 +988,8 @@ function startGame(rounds) {
     .getElementById("gameScreen")
     .classList.remove("hidden");
 
+
+  updateBackButton();
 
   nextMatch();
 
@@ -639,22 +1014,21 @@ function nextMatch() {
 
 
   currentA =
-    Math.floor(
-      Math.random() * members.length
+    getCandidate();
+
+
+  currentB =
+    getOpponent(
+      currentA
     );
 
 
-  do {
+  /*
+    今回の対戦が表示された時点では
+    まだ比較回数を増やさない。
 
-    currentB =
-      Math.floor(
-        Math.random() * members.length
-      );
-
-  }
-  while (
-    currentB === currentA
-  );
+    回答された時に増やす。
+  */
 
 
   const a =
@@ -705,6 +1079,38 @@ function nextMatch() {
     .style.width =
       `${(currentRound / totalRounds) * 100}%`;
 
+
+  updateBackButton();
+
+}
+
+
+/* =====================================================
+   回答前の状態を保存
+===================================================== */
+
+function saveHistory() {
+
+  history.push({
+
+    round: currentRound,
+
+    currentA: currentA,
+
+    currentB: currentB,
+
+    ratings: [...ratings],
+
+    matchCounts: [
+      ...matchCounts
+    ],
+
+    candidateQueue: [
+      ...candidateQueue
+    ]
+
+  });
+
 }
 
 
@@ -713,6 +1119,12 @@ function nextMatch() {
 ===================================================== */
 
 function chooseLeft() {
+
+  saveHistory();
+
+  matchCounts[currentA]++;
+
+  matchCounts[currentB]++;
 
   updateElo(
     currentA,
@@ -730,6 +1142,12 @@ function chooseLeft() {
 
 function chooseRight() {
 
+  saveHistory();
+
+  matchCounts[currentA]++;
+
+  matchCounts[currentB]++;
+
   updateElo(
     currentB,
     currentA
@@ -742,11 +1160,19 @@ function chooseRight() {
 
 /* =====================================================
    どちらでもない
-
-   勝敗をつけない
 ===================================================== */
 
 function chooseNeither() {
+
+  saveHistory();
+
+  matchCounts[currentA]++;
+
+  matchCounts[currentB]++;
+
+  /*
+    勝敗をつけない。
+  */
 
   nextRound();
 
@@ -755,12 +1181,20 @@ function chooseNeither() {
 
 /* =====================================================
    どっちも好き
-
-   両者に同程度の評価を与える
-   → Eloは変化させない
 ===================================================== */
 
 function chooseBoth() {
+
+  saveHistory();
+
+  matchCounts[currentA]++;
+
+  matchCounts[currentB]++;
+
+  /*
+    両方好きなので、
+    どちらか一方だけを上げない。
+  */
 
   nextRound();
 
@@ -807,7 +1241,8 @@ function updateElo(
 
 
   const expectedLoser =
-    1 - expectedWinner;
+    1 -
+    expectedWinner;
 
 
   ratings[winner] +=
@@ -818,6 +1253,176 @@ function updateElo(
   ratings[loser] +=
     K *
     (0 - expectedLoser);
+
+}
+
+
+/* =====================================================
+   1つ前に戻る
+===================================================== */
+
+function goBack() {
+
+  if (
+    history.length === 0
+  ) {
+
+    return;
+
+  }
+
+
+  const previous =
+    history.pop();
+
+
+  currentRound =
+    previous.round;
+
+
+  currentA =
+    previous.currentA;
+
+
+  currentB =
+    previous.currentB;
+
+
+  ratings =
+    [...previous.ratings];
+
+
+  matchCounts =
+    [...previous.matchCounts];
+
+
+  candidateQueue =
+    [...previous.candidateQueue];
+
+
+  const a =
+    members[currentA];
+
+  const b =
+    members[currentB];
+
+
+  document
+    .getElementById("imageA")
+    .src = a.image;
+
+
+  document
+    .getElementById("imageB")
+    .src = b.image;
+
+
+  document
+    .getElementById("nameA")
+    .textContent = a.name;
+
+
+  document
+    .getElementById("nameB")
+    .textContent = b.name;
+
+
+  document
+    .getElementById("groupA")
+    .textContent = a.group;
+
+
+  document
+    .getElementById("groupB")
+    .textContent = b.group;
+
+
+  document
+    .getElementById("roundText")
+    .textContent =
+      `${currentRound + 1} / ${totalRounds}`;
+
+
+  document
+    .getElementById("progressBar")
+    .style.width =
+      `${(currentRound / totalRounds) * 100}%`;
+
+
+  updateBackButton();
+
+}
+
+
+/* =====================================================
+   戻るボタン状態
+===================================================== */
+
+function updateBackButton() {
+
+  const button =
+    document.getElementById(
+      "backButton"
+    );
+
+
+  if (!button) {
+    return;
+  }
+
+
+  button.disabled =
+    history.length === 0;
+
+}
+
+
+/* =====================================================
+   トップに戻る
+===================================================== */
+
+function goHome() {
+
+  const answer =
+    confirm(
+      "トップに戻りますか？\n\n" +
+      "現在のプレイ状況は失われます。"
+    );
+
+
+  if (!answer) {
+
+    return;
+
+  }
+
+
+  location.reload();
+
+}
+
+
+/* =====================================================
+   ゲームをもう一度
+===================================================== */
+
+function restartGame() {
+
+  const answer =
+    confirm(
+      "最初から遊び直しますか？\n\n" +
+      "現在の結果は失われます。"
+    );
+
+
+  if (!answer) {
+
+    return;
+
+  }
+
+
+  location.reload();
 
 }
 
@@ -842,8 +1447,14 @@ function finishGame() {
     members
       .map(
         (member, index) => ({
+
           index: index,
-          rating: ratings[index]
+
+          rating: ratings[index],
+
+          matches:
+            matchCounts[index]
+
         })
       )
       .sort(
@@ -853,7 +1464,10 @@ function finishGame() {
 
 
   const top9 =
-    ranking.slice(0, 9);
+    ranking.slice(
+      0,
+      9
+    );
 
 
   drawResult(top9);
@@ -862,7 +1476,7 @@ function finishGame() {
 
 
 /* =====================================================
-   結果画像
+   結果画像表示
 ===================================================== */
 
 function drawResult(top9) {
@@ -872,12 +1486,14 @@ function drawResult(top9) {
       "resultCanvas"
     );
 
+
   const ctx =
     canvas.getContext("2d");
 
 
   ctx.fillStyle =
     "#ffffff";
+
 
   ctx.fillRect(
     0,
@@ -890,15 +1506,17 @@ function drawResult(top9) {
   ctx.fillStyle =
     "#111111";
 
+
   ctx.textAlign =
     "center";
+
 
   ctx.font =
     "bold 46px sans-serif";
 
 
   ctx.fillText(
-    "ハロプロ好き顔9選",
+    "💎 ハロプロ好き顔9選",
     540,
     52
   );
@@ -926,6 +1544,7 @@ function drawResult(top9) {
           const col =
             rank % 3;
 
+
           const row =
             Math.floor(
               rank / 3
@@ -952,15 +1571,20 @@ function drawResult(top9) {
 
 
           const width =
-            img.width * scale;
+            img.width *
+            scale;
+
 
           const height =
-            img.height * scale;
+            img.height *
+            scale;
 
 
           ctx.save();
 
+
           ctx.beginPath();
+
 
           ctx.rect(
             x,
@@ -968,6 +1592,7 @@ function drawResult(top9) {
             size,
             size
           );
+
 
           ctx.clip();
 
@@ -986,10 +1611,13 @@ function drawResult(top9) {
           ctx.restore();
 
 
-          /* 順位 */
+          /*
+            順位
+          */
 
           ctx.fillStyle =
             "rgba(0,0,0,.75)";
+
 
           ctx.fillRect(
             x,
@@ -1002,6 +1630,7 @@ function drawResult(top9) {
           ctx.fillStyle =
             "#ffffff";
 
+
           ctx.font =
             "bold 30px sans-serif";
 
@@ -1013,10 +1642,13 @@ function drawResult(top9) {
           );
 
 
-          /* 名前・グループ */
+          /*
+            名前・グループ
+          */
 
           ctx.fillStyle =
             "rgba(0,0,0,.78)";
+
 
           ctx.fillRect(
             x,
@@ -1028,6 +1660,7 @@ function drawResult(top9) {
 
           ctx.fillStyle =
             "#ffffff";
+
 
           ctx.font =
             "bold 17px sans-serif";
@@ -1057,6 +1690,67 @@ function drawResult(top9) {
         };
 
 
+      img.onerror =
+        function() {
+
+          /*
+            画像が読み込めない場合も、
+            名前だけは結果に残す。
+          */
+
+          const col =
+            rank % 3;
+
+
+          const row =
+            Math.floor(
+              rank / 3
+            );
+
+
+          const x =
+            startX +
+            col *
+            (size + gap);
+
+
+          const y =
+            startY +
+            row *
+            (size + gap);
+
+
+          ctx.fillStyle =
+            "#eeeeee";
+
+
+          ctx.fillRect(
+            x,
+            y,
+            size,
+            size
+          );
+
+
+          ctx.fillStyle =
+            "#222222";
+
+
+          ctx.font =
+            "bold 24px sans-serif";
+
+
+          ctx.fillText(
+            members[
+              person.index
+            ].name,
+            x + size / 2,
+            y + size / 2
+          );
+
+        };
+
+
       img.src =
         members[
           person.index
@@ -1069,96 +1763,41 @@ function drawResult(top9) {
 
 
 /* =====================================================
-   保存
+   画像の右クリック・ドラッグを抑止
 ===================================================== */
 
-function saveResult() {
+document.addEventListener(
+  "contextmenu",
+  function(event) {
 
-  const canvas =
-    document.getElementById(
-      "resultCanvas"
-    );
+    if (
+      event.target.tagName ===
+      "IMG"
+    ) {
 
+      event.preventDefault();
 
-  const link =
-    document.createElement("a");
+    }
 
-
-  link.download =
-    "ハロプロ好き顔9選.png";
-
-
-  link.href =
-    canvas.toDataURL(
-      "image/png"
-    );
+  }
+);
 
 
-  link.click();
+document.addEventListener(
+  "dragstart",
+  function(event) {
 
-}
+    if (
+      event.target.tagName ===
+      "IMG"
+    ) {
 
+      event.preventDefault();
 
-/* =====================================================
-   共有
-===================================================== */
+    }
 
-async function shareResult() {
-
-  const canvas =
-    document.getElementById(
-      "resultCanvas"
-    );
-
-
-  canvas.toBlob(
-    async function(blob) {
-
-      const file =
-        new File(
-          [blob],
-          "ハロプロ好き顔9選.png",
-          {
-            type: "image/png"
-          }
-        );
-
-
-      if (
-        navigator.share &&
-        navigator.canShare &&
-        navigator.canShare({
-          files: [file]
-        })
-      ) {
-
-        try {
-
-          await navigator.share({
-            files: [file],
-            title:
-              "ハロプロ好き顔9選"
-          });
-
-        }
-        catch (error) {
-
-        }
-
-      }
-      else {
-
-        alert(
-          "まず画像を保存してから共有してください。"
-        );
-
-      }
-
-    },
-    "image/png"
-  );
-
-}
+  }
+);
 
 </script>
 
