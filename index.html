@@ -135,7 +135,7 @@ h1 {
   height: 100%;
   width: 0%;
   background: #222;
-  transition: width .2s;
+  transition: width .15s;
 }
 
 .question {
@@ -157,6 +157,7 @@ h1 {
   border: 3px solid #eee;
   border-radius: 18px;
   cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .faceChoice:active {
@@ -203,6 +204,7 @@ h1 {
   font-size: 14px;
   font-weight: bold;
   cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .gameControls {
@@ -240,10 +242,11 @@ h1 {
   margin-top: 15px;
 }
 
-.resultButtons p {
+.resultMessage {
   text-align: center;
   color: #777;
   font-size: 13px;
+  line-height: 1.6;
 }
 
 .restart {
@@ -266,7 +269,7 @@ h1 {
 
 
 /* =========================
-   警告
+   トップ確認
 ========================= */
 
 .modal {
@@ -315,6 +318,18 @@ h1 {
 .confirmButton {
   background: #222;
   color: white;
+}
+
+
+/* =========================
+   読み込み表示
+========================= */
+
+.loadingText {
+  text-align: center;
+  color: #888;
+  font-size: 12px;
+  margin-top: 12px;
 }
 
 </style>
@@ -386,7 +401,7 @@ STANDARD✨
 
 <br><br>
 
-選択結果をElo方式で集計し、
+選択結果をElo方式と選択履歴の両方で集計し、
 最後にあなたの
 <strong>「好き顔9選」</strong>
 を決定します。
@@ -406,12 +421,18 @@ STANDARD✨
 
 ・本当に両方好きなら「どっちも好き」を選ぶ<br>
 
-・後半になるほど、あなたが選んできたメンバー同士の対戦が増えます<br>
+・序盤は70人をできるだけ幅広く登場させます<br>
 
-・同じ組み合わせばかりにならないよう、自動的に対戦履歴も考慮します<br>
+・後半になるほど、あなたが選んできたメンバー同士の対戦が増えます<br>
 
 ・特に好きなメンバー同士をしっかり比較すると、9人が絞られやすくなります
 
+</div>
+
+<div
+  id="preloadStatus"
+  class="loadingText">
+画像を準備しています…
 </div>
 
 </div>
@@ -541,9 +562,9 @@ STANDARD✨
 
 <div class="resultButtons">
 
-<p>
+<div class="resultMessage">
 📸 結果はスクリーンショットで保存・共有してください
-</p>
+</div>
 
 </div>
 
@@ -617,8 +638,8 @@ STANDARD✨
 <script>
 
 /* =====================================================
-   70人のメンバー
-   ※ここは削除・変更していません
+   ★ 70人のメンバー
+   ★ ここは削らない
 ===================================================== */
 
 const members = [
@@ -711,20 +732,79 @@ let ratings = [];
 let selectedCount = [];
 let appearanceCount = [];
 let winCount = [];
-
-/*
-   pairCounts[A][B]
-   AとBが何回対戦したか
-*/
-let pairCounts = [];
+let bothCount = [];
 
 let history = [];
+let pairHistory = new Set();
 
 let totalRounds = 50;
 let currentRound = 0;
 
 let currentA = -1;
 let currentB = -1;
+
+let gameLocked = false;
+
+
+/* =====================================================
+   画像キャッシュ
+===================================================== */
+
+const imageCache = new Map();
+
+function preloadImages() {
+
+  let loaded = 0;
+
+  const status =
+    document.getElementById("preloadStatus");
+
+  members.forEach((member) => {
+
+    const img = new Image();
+
+    img.onload = function() {
+
+      imageCache.set(
+        member.image,
+        img
+      );
+
+      loaded++;
+
+      if (loaded >= members.length) {
+
+        status.textContent =
+          "画像の準備完了！✨";
+
+      }
+      else {
+
+        status.textContent =
+          `画像を準備中… ${loaded}/${members.length}`;
+
+      }
+
+    };
+
+    img.onerror = function() {
+
+      loaded++;
+
+      if (loaded >= members.length) {
+
+        status.textContent =
+          "画像の準備完了！✨";
+
+      }
+
+    };
+
+    img.src = member.image;
+
+  });
+
+}
 
 
 /* =====================================================
@@ -737,19 +817,22 @@ function initializeRatings() {
   selectedCount = [];
   appearanceCount = [];
   winCount = [];
-  pairCounts = [];
-  history = [];
+  bothCount = [];
 
-  for (let i = 0; i < members.length; i++) {
+  history = [];
+  pairHistory = new Set();
+
+  for (
+    let i = 0;
+    i < members.length;
+    i++
+  ) {
 
     ratings.push(1000);
     selectedCount.push(0);
     appearanceCount.push(0);
     winCount.push(0);
-
-    pairCounts.push(
-      new Array(members.length).fill(0)
-    );
+    bothCount.push(0);
 
   }
 
@@ -769,6 +852,7 @@ function startGame(rounds) {
     );
 
     return;
+
   }
 
   totalRounds = rounds;
@@ -790,17 +874,28 @@ function startGame(rounds) {
 
 
 /* =====================================================
-   未出現メンバー取得
+   まだ一度も出ていないメンバー
 ===================================================== */
 
-function getUnseenMembers() {
+function getUnseenMembers(
+  excludeIndex = -1
+) {
 
   const result = [];
 
-  for (let i = 0; i < members.length; i++) {
+  for (
+    let i = 0;
+    i < members.length;
+    i++
+  ) {
 
-    if (appearanceCount[i] === 0) {
+    if (
+      i !== excludeIndex &&
+      appearanceCount[i] === 0
+    ) {
+
       result.push(i);
+
     }
 
   }
@@ -811,7 +906,7 @@ function getUnseenMembers() {
 
 
 /* =====================================================
-   メンバーの基本重み
+   重み計算
 ===================================================== */
 
 function getMemberWeight(index) {
@@ -819,17 +914,15 @@ function getMemberWeight(index) {
   const progress =
     currentRound / totalRounds;
 
-  const selected =
-    selectedCount[index];
-
   const appearances =
     appearanceCount[index];
 
+  const selected =
+    selectedCount[index];
 
   /*
-     一度も出ていない人は強く優先。
-     これにより200回コースで
-     一度も見ていない人が大量に残ることを防ぐ。
+     まだ一度も出ていない人は
+     最優先。
   */
 
   if (appearances === 0) {
@@ -840,86 +933,68 @@ function getMemberWeight(index) {
 
 
   /*
-     未選択だが既に登場した人。
-     序盤～中盤ではまだ十分登場させる。
+     選ばれた回数を重視。
+
+     後半ほど効果を強くする。
   */
 
-  if (selected === 0) {
+  let selectedMultiplier;
 
-    if (progress < 0.35) {
-      return 7;
-    }
+  if (progress < 0.30) {
 
-    if (progress < 0.65) {
-      return 3;
-    }
-
-    return 1.5;
+    selectedMultiplier = 1.2;
 
   }
+  else if (progress < 0.60) {
+
+    selectedMultiplier = 3;
+
+  }
+  else {
+
+    selectedMultiplier = 7;
+
+  }
+
+
+  const favoriteWeight =
+    1 +
+    selected *
+    selectedMultiplier;
 
 
   /*
-     選択されたメンバー。
-     後半ほど優先度を上げる。
+     勝った回数も少しだけ反映。
   */
 
-  let progressMultiplier = 1;
-
-  if (progress >= 0.35 && progress < 0.65) {
-    progressMultiplier = 2.5;
-  }
-
-  if (progress >= 0.65) {
-    progressMultiplier = 5;
-  }
-
-
-  /*
-     選択回数が多いほど少し優先。
-     ただし一人に偏りすぎないよう上限を設定。
-  */
-
-  const selectionWeight =
+  const winWeight =
+    1 +
     Math.min(
-      1 + selected * 1.4,
-      7
+      winCount[index] * 0.35,
+      5
     );
 
 
   /*
-     Eloも少しだけ考慮。
-     Eloだけで候補が固定されないよう弱めにする。
-  */
-
-  const eloWeight =
-    Math.max(
-      0.75,
-      Math.min(
-        ratings[index] / 1000,
-        1.5
-      )
-    );
-
-
-  /*
-     出現しすぎている人は少しだけ減らす。
+     出現しすぎている人には
+     少しブレーキをかける。
   */
 
   const appearancePenalty =
-    Math.max(
-      0.65,
-      1 - Math.max(
+    1 /
+    (
+      1 +
+      Math.max(
         0,
-        appearances - 4
-      ) * 0.03
+        appearances - 3
+      ) * 0.08
     );
 
 
-  return (
-    selectionWeight *
-    progressMultiplier *
-    eloWeight *
+  return Math.max(
+    0.2,
+    favoriteWeight *
+    winWeight *
     appearancePenalty
   );
 
@@ -932,56 +1007,44 @@ function getMemberWeight(index) {
 
 function weightedRandom(
   excludeIndex = -1,
-  avoidPairWith = -1
+  avoidRecent = true
 ) {
 
   const candidates = [];
 
   let totalWeight = 0;
 
-
-  for (let i = 0; i < members.length; i++) {
+  for (
+    let i = 0;
+    i < members.length;
+    i++
+  ) {
 
     if (i === excludeIndex) {
       continue;
     }
 
-
-    let weight =
-      getMemberWeight(i);
-
-
     /*
-       同じ相手との再戦を抑える。
-
-       0回 → そのまま
-       1回 → 少し下げる
-       2回 → 大きく下げる
-       3回以上 → かなり避ける
+       直近で同じ相手が続くのを防ぐ。
     */
 
+    let recentPenalty = 1;
+
     if (
-      avoidPairWith !== -1
+      avoidRecent &&
+      isRecentPair(
+        excludeIndex,
+        i
+      )
     ) {
 
-      const times =
-        pairCounts[
-          avoidPairWith
-        ][i];
-
-
-      if (times === 1) {
-        weight *= 0.35;
-      }
-      else if (times === 2) {
-        weight *= 0.08;
-      }
-      else if (times >= 3) {
-        weight *= 0.01;
-      }
+      recentPenalty = 0.08;
 
     }
 
+    const weight =
+      getMemberWeight(i) *
+      recentPenalty;
 
     candidates.push({
       index: i,
@@ -993,15 +1056,12 @@ function weightedRandom(
   }
 
 
-  /*
-     全候補の重みが極端に小さくなった場合の安全策
-  */
-
   if (totalWeight <= 0) {
 
     return candidates[
       Math.floor(
-        Math.random() * candidates.length
+        Math.random() *
+        candidates.length
       )
     ].index;
 
@@ -1009,7 +1069,8 @@ function weightedRandom(
 
 
   let random =
-    Math.random() * totalWeight;
+    Math.random() *
+    totalWeight;
 
 
   for (
@@ -1036,31 +1097,140 @@ function weightedRandom(
 
 
 /* =====================================================
-   対戦相手選択
+   最近の組み合わせ確認
 ===================================================== */
 
-function chooseOpponent(firstIndex) {
+function isRecentPair(
+  a,
+  b
+) {
+
+  if (
+    a === -1 ||
+    b === -1
+  ) {
+
+    return false;
+
+  }
+
+  const key =
+    makePairKey(a, b);
+
+  /*
+     履歴の最後から最大8試合を見る。
+  */
+
+  let checked = 0;
+
+  for (
+    let i = history.length - 1;
+    i >= 0 && checked < 8;
+    i--
+  ) {
+
+    const item =
+      history[i];
+
+    if (
+      makePairKey(
+        item.currentA,
+        item.currentB
+      ) === key
+    ) {
+
+      return true;
+
+    }
+
+    checked++;
+
+  }
+
+  return false;
+
+}
+
+
+/* =====================================================
+   組み合わせキー
+===================================================== */
+
+function makePairKey(a, b) {
+
+  return a < b
+    ? `${a}_${b}`
+    : `${b}_${a}`;
+
+}
+
+
+/* =====================================================
+   相手選択
+===================================================== */
+
+function chooseOpponent(
+  firstIndex
+) {
 
   const progress =
     currentRound / totalRounds;
 
 
-  const preferred = [];
+  /*
+     序盤でまだ出ていない人がいるなら、
+     まず全員を登場させる。
+  */
+
+  const unseen =
+    getUnseenMembers(
+      firstIndex
+    );
+
+
+  if (
+    unseen.length > 0
+  ) {
+
+    /*
+       まだ出ていない人を
+       優先的に相手にする。
+    */
+
+    const randomUnseen =
+      unseen[
+        Math.floor(
+          Math.random() *
+          unseen.length
+        )
+      ];
+
+    return randomUnseen;
+
+  }
 
 
   /*
-     一度でも選んだことのあるメンバーを
-     後半の対戦相手候補として集める。
+     中盤以降。
+
+     選ばれたことのあるメンバー同士を
+     しっかり比較する。
   */
 
-  for (let i = 0; i < members.length; i++) {
+  const selectedMembers = [];
+
+  for (
+    let i = 0;
+    i < members.length;
+    i++
+  ) {
 
     if (
       i !== firstIndex &&
       selectedCount[i] > 0
     ) {
 
-      preferred.push(i);
+      selectedMembers.push(i);
 
     }
 
@@ -1068,93 +1238,56 @@ function chooseOpponent(firstIndex) {
 
 
   /*
-     序盤は幅広く、
-     中盤以降は選択済み同士を増やす。
+     選ばれた人が2人以上いる場合、
+     後半ほどそこから相手を選ぶ。
   */
 
-  let preferredChance = 0;
-
-  if (progress >= 0.35 && progress < 0.65) {
-    preferredChance = 0.60;
-  }
-
-  if (progress >= 0.65) {
-    preferredChance = 0.85;
-  }
-
-
   if (
-    preferred.length > 0 &&
-    Math.random() < preferredChance
+    selectedMembers.length > 0 &&
+    progress >= 0.30
   ) {
 
-    const candidates = [];
+    let chance;
 
-    let totalWeight = 0;
+    if (progress < 0.60) {
 
+      chance = 0.65;
 
-    for (
-      const index
-      of preferred
-    ) {
+    }
+    else {
 
-      let weight =
-        1 +
-        selectedCount[index] * 1.5;
-
-
-      /*
-         対戦済みなら大幅に減らす。
-      */
-
-      const times =
-        pairCounts[
-          firstIndex
-        ][index];
-
-
-      if (times === 1) {
-        weight *= 0.3;
-      }
-      else if (times === 2) {
-        weight *= 0.05;
-      }
-      else if (times >= 3) {
-        weight *= 0.005;
-      }
-
-
-      /*
-         Elo差が極端になりすぎないよう軽く調整。
-      */
-
-      const eloFactor =
-        Math.max(
-          0.75,
-          Math.min(
-            ratings[index] / 1000,
-            1.5
-          )
-        );
-
-
-      weight *= eloFactor;
-
-
-      candidates.push({
-        index: index,
-        weight: weight
-      });
-
-      totalWeight += weight;
+      chance = 0.88;
 
     }
 
 
-    if (totalWeight > 0) {
+    if (
+      Math.random() < chance
+    ) {
+
+      const candidates =
+        selectedMembers.map(
+          index => ({
+            index: index,
+            weight:
+              getMemberWeight(index)
+          })
+        );
+
+
+      let total = 0;
+
+      candidates.forEach(
+        candidate => {
+          total +=
+            candidate.weight;
+        }
+      );
+
 
       let random =
-        Math.random() * totalWeight;
+        Math.random() *
+        total;
 
 
       for (
@@ -1162,9 +1295,12 @@ function chooseOpponent(firstIndex) {
         of candidates
       ) {
 
-        random -= candidate.weight;
+        random -=
+          candidate.weight;
 
-        if (random <= 0) {
+        if (
+          random <= 0
+        ) {
 
           return candidate.index;
 
@@ -1179,7 +1315,7 @@ function chooseOpponent(firstIndex) {
 
   return weightedRandom(
     firstIndex,
-    firstIndex
+    true
   );
 
 }
@@ -1202,46 +1338,22 @@ function nextMatch() {
   }
 
 
-  /*
-     まず「一度も出ていないメンバー」がいる間は、
-     A側に未出現メンバーを優先する。
+  gameLocked = false;
 
-     これにより200回やっても
-     一度も出ないメンバーが大量に残る問題を防ぐ。
+
+  /*
+     まずAを決定。
   */
 
-  const unseen =
-    getUnseenMembers();
-
-
-  if (
-    unseen.length > 0 &&
-    currentRound < members.length
-  ) {
-
-    /*
-       未出現メンバーからランダムに選ぶ。
-    */
-
-    currentA =
-      unseen[
-        Math.floor(
-          Math.random() *
-          unseen.length
-        )
-      ];
-
-  }
-  else {
-
-    currentA =
-      weightedRandom();
-
-  }
+  currentA =
+    weightedRandom(
+      -1,
+      true
+    );
 
 
   /*
-     B側はAとの過去対戦回数も考慮。
+     BはAとの組み合わせを考えて決定。
   */
 
   currentB =
@@ -1251,42 +1363,42 @@ function nextMatch() {
 
 
   /*
-     同じ人にならない安全策。
+     もし同じ組み合わせになってしまったら、
+     最大10回やり直す。
   */
 
-  if (
-    currentB === currentA
+  let attempts = 0;
+
+  while (
+    pairHistory.has(
+      makePairKey(
+        currentA,
+        currentB
+      )
+    ) &&
+    attempts < 10
   ) {
 
     currentB =
-      weightedRandom(
-        currentA,
+      chooseOpponent(
         currentA
       );
+
+    attempts++;
 
   }
 
 
-  /*
-     対戦回数を記録。
-     A-BとB-Aは同じ対戦として扱う。
-  */
-
-  pairCounts[
-    currentA
-  ][
-    currentB
-  ]++;
-
-  pairCounts[
-    currentB
-  ][
-    currentA
-  ]++;
-
-
   appearanceCount[currentA]++;
   appearanceCount[currentB]++;
+
+
+  pairHistory.add(
+    makePairKey(
+      currentA,
+      currentB
+    )
+  );
 
 
   showCurrentMatch();
@@ -1295,7 +1407,7 @@ function nextMatch() {
 
 
 /* =====================================================
-   現在の対戦を表示
+   現在の対戦表示
 ===================================================== */
 
 function showCurrentMatch() {
@@ -1307,31 +1419,80 @@ function showCurrentMatch() {
     members[currentB];
 
 
-  document
-    .getElementById("imageA")
-    .src = a.image;
+  const imageA =
+    document.getElementById(
+      "imageA"
+    );
 
-  document
-    .getElementById("imageB")
-    .src = b.image;
+  const imageB =
+    document.getElementById(
+      "imageB"
+    );
+
+
+  /*
+     キャッシュ済み画像を使う。
+  */
+
+  const cachedA =
+    imageCache.get(
+      a.image
+    );
+
+  const cachedB =
+    imageCache.get(
+      b.image
+    );
+
+
+  if (cachedA) {
+
+    imageA.src =
+      cachedA.src;
+
+  }
+  else {
+
+    imageA.src =
+      a.image;
+
+  }
+
+
+  if (cachedB) {
+
+    imageB.src =
+      cachedB.src;
+
+  }
+  else {
+
+    imageB.src =
+      b.image;
+
+  }
 
 
   document
     .getElementById("nameA")
-    .textContent = a.name;
+    .textContent =
+      a.name;
 
   document
     .getElementById("nameB")
-    .textContent = b.name;
+    .textContent =
+      b.name;
 
 
   document
     .getElementById("groupA")
-    .textContent = a.group;
+    .textContent =
+      a.group;
 
   document
     .getElementById("groupB")
-    .textContent = b.group;
+    .textContent =
+      b.group;
 
 
   document
@@ -1343,7 +1504,10 @@ function showCurrentMatch() {
   document
     .getElementById("progressBar")
     .style.width =
-      `${(currentRound / totalRounds) * 100}%`;
+      `${(
+        currentRound /
+        totalRounds
+      ) * 100}%`;
 
 
   updateBackButton();
@@ -1355,7 +1519,9 @@ function showCurrentMatch() {
    履歴保存
 ===================================================== */
 
-function saveHistory(action) {
+function saveHistory(
+  action
+) {
 
   history.push({
 
@@ -1371,10 +1537,8 @@ function saveHistory(action) {
     winCount:
       [...winCount],
 
-    pairCounts:
-      pairCounts.map(
-        row => [...row]
-      ),
+    bothCount:
+      [...bothCount],
 
     currentA:
       currentA,
@@ -1394,63 +1558,41 @@ function saveHistory(action) {
 
 
 /* =====================================================
-   選択後に対戦回数を1つ戻す
-===================================================== */
-
-function undoCurrentAppearance() {
-
-  if (
-    currentA >= 0 &&
-    currentB >= 0
-  ) {
-
-    appearanceCount[currentA] =
-      Math.max(
-        0,
-        appearanceCount[currentA] - 1
-      );
-
-    appearanceCount[currentB] =
-      Math.max(
-        0,
-        appearanceCount[currentB] - 1
-      );
-
-
-    pairCounts[currentA][currentB] =
-      Math.max(
-        0,
-        pairCounts[currentA][currentB] - 1
-      );
-
-    pairCounts[currentB][currentA] =
-      Math.max(
-        0,
-        pairCounts[currentB][currentA] - 1
-      );
-
-  }
-
-}
-
-
-/* =====================================================
    左を選択
 ===================================================== */
 
 function chooseLeft() {
 
-  saveHistory("left");
+  if (gameLocked) {
+    return;
+  }
 
-  selectedCount[currentA]++;
-  winCount[currentA]++;
+  gameLocked = true;
+
+
+  saveHistory(
+    "left"
+  );
+
+
+  selectedCount[
+    currentA
+  ]++;
+
+
+  winCount[
+    currentA
+  ]++;
+
 
   updateElo(
     currentA,
     currentB
   );
 
+
   currentRound++;
+
 
   nextMatch();
 
@@ -1463,17 +1605,36 @@ function chooseLeft() {
 
 function chooseRight() {
 
-  saveHistory("right");
+  if (gameLocked) {
+    return;
+  }
 
-  selectedCount[currentB]++;
-  winCount[currentB]++;
+  gameLocked = true;
+
+
+  saveHistory(
+    "right"
+  );
+
+
+  selectedCount[
+    currentB
+  ]++;
+
+
+  winCount[
+    currentB
+  ]++;
+
 
   updateElo(
     currentB,
     currentA
   );
 
+
   currentRound++;
+
 
   nextMatch();
 
@@ -1486,14 +1647,20 @@ function chooseRight() {
 
 function chooseNeither() {
 
-  saveHistory("neither");
+  if (gameLocked) {
+    return;
+  }
 
-  /*
-     どちらでもない場合は
-     好きだったという記録を付けない。
-  */
+  gameLocked = true;
+
+
+  saveHistory(
+    "neither"
+  );
+
 
   currentRound++;
+
 
   nextMatch();
 
@@ -1506,17 +1673,49 @@ function chooseNeither() {
 
 function chooseBoth() {
 
-  saveHistory("both");
+  if (gameLocked) {
+    return;
+  }
+
+  gameLocked = true;
+
+
+  saveHistory(
+    "both"
+  );
+
 
   /*
-     両方好きなので両者に選択記録を付ける。
-     ただし勝敗は付けない。
+     両方好きも、
+     「この人は好き」という
+     明確な選択として記録する。
   */
 
-  selectedCount[currentA]++;
-  selectedCount[currentB]++;
+  selectedCount[
+    currentA
+  ]++;
+
+  selectedCount[
+    currentB
+  ]++;
+
+
+  bothCount[
+    currentA
+  ]++;
+
+  bothCount[
+    currentB
+  ]++;
+
+
+  /*
+     Eloはそのまま。
+     ただし選択履歴には強く反映する。
+  */
 
   currentRound++;
+
 
   nextMatch();
 
@@ -1538,16 +1737,6 @@ function goBack() {
   }
 
 
-  /*
-     現在表示中の対戦は
-     nextMatch()で既にappearance/pairCountsに
-     加算されているため、
-     まず現在の対戦分を取り消す。
-  */
-
-  undoCurrentAppearance();
-
-
   const previous =
     history.pop();
 
@@ -1564,15 +1753,12 @@ function goBack() {
   winCount =
     [...previous.winCount];
 
-  pairCounts =
-    previous.pairCounts.map(
-      row => [...row]
-    );
+  bothCount =
+    [...previous.bothCount];
 
 
   currentRound =
     previous.round;
-
 
   currentA =
     previous.currentA;
@@ -1582,12 +1768,46 @@ function goBack() {
 
 
   /*
-     前回回答後に生成された
-     現在の対戦ではなく、
-     「戻したい前回の対戦」を表示。
+     現在の組み合わせを
+     再度使えるようにする。
   */
 
+  pairHistory.delete(
+    makePairKey(
+      currentA,
+      currentB
+    )
+  );
+
+
+  /*
+     戻ることで現在の2人の
+     出現回数も1回戻す。
+  */
+
+  appearanceCount[
+    currentA
+  ] = Math.max(
+    0,
+    appearanceCount[
+      currentA
+    ] - 1
+  );
+
+
+  appearanceCount[
+    currentB
+  ] = Math.max(
+    0,
+    appearanceCount[
+      currentB
+    ] - 1
+  );
+
+
   showCurrentMatch();
+
+  gameLocked = false;
 
   updateBackButton();
 
@@ -1635,180 +1855,24 @@ function updateElo(
 
 
   const expectedLoser =
-    1 - expectedWinner;
+    1 -
+    expectedWinner;
 
 
   ratings[winner] +=
     K *
-    (1 - expectedWinner);
+    (
+      1 -
+      expectedWinner
+    );
 
 
   ratings[loser] +=
     K *
-    (0 - expectedLoser);
-
-}
-
-
-/* =====================================================
-   結果候補
-===================================================== */
-
-function buildRanking() {
-
-  const ranking =
-    members
-      .map(
-        (member, index) => ({
-
-          index: index,
-
-          rating:
-            ratings[index],
-
-          selected:
-            selectedCount[index],
-
-          appearances:
-            appearanceCount[index],
-
-          wins:
-            winCount[index]
-
-        })
-      );
-
-
-  /*
-     最重要ルール：
-
-     「一度も選ばれていない人」を
-     いきなり好き顔9選に入れない。
-
-     選択済みの人を最優先。
-  */
-
-  const selectedMembers =
-    ranking.filter(
-      person =>
-        person.selected > 0
+    (
+      0 -
+      expectedLoser
     );
-
-
-  /*
-     選択済みメンバーを
-     Elo → 選択回数 → 勝利数
-     の順で比較する。
-  */
-
-  selectedMembers.sort(
-    (a, b) => {
-
-      if (
-        b.rating !== a.rating
-      ) {
-
-        return (
-          b.rating -
-          a.rating
-        );
-
-      }
-
-
-      if (
-        b.selected !== a.selected
-      ) {
-
-        return (
-          b.selected -
-          a.selected
-        );
-
-      }
-
-
-      return (
-        b.wins -
-        a.wins
-      );
-
-    }
-  );
-
-
-  /*
-     9人に届かない場合だけ、
-     「表示されたが選んでいない人」
-     から補充する。
-
-     未出現の人はここにも入れない。
-  */
-
-  const appearedMembers =
-    ranking.filter(
-      person =>
-        person.appearances > 0 &&
-        person.selected === 0
-    );
-
-
-  appearedMembers.sort(
-    (a, b) =>
-      b.rating - a.rating
-  );
-
-
-  const result = [];
-
-
-  for (
-    const person
-    of selectedMembers
-  ) {
-
-    if (
-      result.length >= 9
-    ) {
-
-      break;
-
-    }
-
-    result.push(person);
-
-  }
-
-
-  /*
-     9人未満の場合のみ補充。
-  */
-
-  if (
-    result.length < 9
-  ) {
-
-    for (
-      const person
-      of appearedMembers
-    ) {
-
-      if (
-        result.length >= 9
-      ) {
-
-        break;
-
-      }
-
-      result.push(person);
-
-    }
-
-  }
-
-
-  return result;
 
 }
 
@@ -1829,11 +1893,136 @@ function finishGame() {
     .classList.remove("hidden");
 
 
+  /*
+     ★重要
+
+     一度も「好き」と選ばれていない人は
+     最終9選から除外する。
+
+     「左が好き」
+     「右が好き」
+     「どっちも好き」
+
+     のいずれかを一度でも選ばれた人だけを
+     最終候補にする。
+  */
+
+  const selectedMembers =
+    members
+      .map(
+        (member, index) => ({
+          index: index,
+          rating:
+            ratings[index],
+          selected:
+            selectedCount[index],
+          wins:
+            winCount[index],
+          both:
+            bothCount[index],
+          appearances:
+            appearanceCount[index]
+        })
+      )
+      .filter(
+        person =>
+          person.selected > 0
+      );
+
+
+  /*
+     選択されたメンバーが9人以上いる場合。
+
+     Eloを基本にしつつ、
+     実際の選択回数をかなり強く反映。
+  */
+
+  selectedMembers.sort(
+    (a, b) => {
+
+      const scoreA =
+        calculateFinalScore(a);
+
+      const scoreB =
+        calculateFinalScore(b);
+
+      return scoreB - scoreA;
+
+    }
+  );
+
+
+  /*
+     通常はここで9人。
+  */
+
   const top9 =
-    buildRanking();
+    selectedMembers.slice(
+      0,
+      9
+    );
 
 
-  drawResult(top9);
+  /*
+     もし「どちらでもない」ばかりで
+     9人に届かなかった場合。
+
+     未選択者を勝手に好き顔9選へ
+     入れない。
+  */
+
+  drawResult(
+    top9
+  );
+
+}
+
+
+/* =====================================================
+   最終スコア
+===================================================== */
+
+function calculateFinalScore(
+  person
+) {
+
+  /*
+     Eloをベースにする。
+
+     さらに、
+     「実際に好きと選ばれた回数」を
+     大きく加点。
+
+     これで、
+     一度も選んでいない人が
+     Eloだけで上位に来る問題を防ぐ。
+  */
+
+  const eloScore =
+    person.rating;
+
+
+  const selectionScore =
+    person.selected *
+    55;
+
+
+  const winScore =
+    person.wins *
+    18;
+
+
+  const bothScore =
+    person.both *
+    12;
+
+
+  return (
+    eloScore +
+    selectionScore +
+    winScore +
+    bothScore
+  );
 
 }
 
@@ -1842,7 +2031,9 @@ function finishGame() {
    結果画像
 ===================================================== */
 
-function drawResult(top9) {
+function drawResult(
+  top9
+) {
 
   const canvas =
     document.getElementById(
@@ -1889,6 +2080,28 @@ function drawResult(top9) {
   );
 
 
+  /*
+     9人未満の場合の表示。
+  */
+
+  if (
+    top9.length === 0
+  ) {
+
+    ctx.font =
+      "bold 30px sans-serif";
+
+    ctx.fillText(
+      "好きなメンバーをもう少し選んでみてね！",
+      540,
+      540
+    );
+
+    return;
+
+  }
+
+
   const size = 325;
   const gap = 17;
   const startX = 35;
@@ -1898,157 +2111,217 @@ function drawResult(top9) {
   top9.forEach(
     (person, rank) => {
 
-      const img =
-        new Image();
+      const col =
+        rank % 3;
+
+      const row =
+        Math.floor(
+          rank / 3
+        );
 
 
-      img.onload =
-        function() {
-
-          const col =
-            rank % 3;
-
-          const row =
-            Math.floor(
-              rank / 3
-            );
+      const x =
+        startX +
+        col *
+        (size + gap);
 
 
-          const x =
-            startX +
-            col *
-            (size + gap);
+      const y =
+        startY +
+        row *
+        (size + gap);
 
 
-          const y =
-            startY +
-            row *
-            (size + gap);
-
-
-          const scale =
-            Math.max(
-              size / img.width,
-              size / img.height
-            );
-
-
-          const width =
-            img.width * scale;
-
-          const height =
-            img.height * scale;
-
-
-          ctx.save();
-
-          ctx.beginPath();
-
-          ctx.rect(
-            x,
-            y,
-            size,
-            size
-          );
-
-          ctx.clip();
-
-
-          ctx.drawImage(
-            img,
-            x +
-              (size - width) / 2,
-            y +
-              (size - height) / 2,
-            width,
-            height
-          );
-
-
-          ctx.restore();
-
-
-          /*
-             順位
-          */
-
-          ctx.fillStyle =
-            "rgba(0,0,0,.75)";
-
-          ctx.fillRect(
-            x,
-            y,
-            70,
-            52
-          );
-
-
-          ctx.fillStyle =
-            "#ffffff";
-
-          ctx.font =
-            "bold 30px sans-serif";
-
-
-          ctx.fillText(
-            `#${rank + 1}`,
-            x + 35,
-            y + 36
-          );
-
-
-          /*
-             名前・グループ
-          */
-
-          ctx.fillStyle =
-            "rgba(0,0,0,.78)";
-
-          ctx.fillRect(
-            x,
-            y + size - 55,
-            size,
-            55
-          );
-
-
-          ctx.fillStyle =
-            "#ffffff";
-
-          ctx.font =
-            "bold 17px sans-serif";
-
-
-          ctx.fillText(
-            members[
-              person.index
-            ].name,
-            x + size / 2,
-            y + size - 32
-          );
-
-
-          ctx.font =
-            "12px sans-serif";
-
-
-          ctx.fillText(
-            members[
-              person.index
-            ].group,
-            x + size / 2,
-            y + size - 13
-          );
-
-        };
-
-
-      img.src =
+      const member =
         members[
           person.index
-        ].image;
+        ];
+
+
+      const cached =
+        imageCache.get(
+          member.image
+        );
+
+
+      /*
+         キャッシュ済み画像を
+         canvasに直接描画。
+      */
+
+      if (cached) {
+
+        drawResultImage(
+          ctx,
+          cached,
+          x,
+          y,
+          size,
+          person,
+          rank
+        );
+
+      }
+      else {
+
+        const img =
+          new Image();
+
+        img.onload =
+          function() {
+
+            drawResultImage(
+              ctx,
+              img,
+              x,
+              y,
+              size,
+              person,
+              rank
+            );
+
+          };
+
+        img.src =
+          member.image;
+
+      }
 
     }
+  );
+
+}
+
+
+/* =====================================================
+   結果画像1枚を描画
+===================================================== */
+
+function drawResultImage(
+  ctx,
+  img,
+  x,
+  y,
+  size,
+  person,
+  rank
+) {
+
+  const scale =
+    Math.max(
+      size / img.width,
+      size / img.height
+    );
+
+
+  const width =
+    img.width * scale;
+
+  const height =
+    img.height * scale;
+
+
+  ctx.save();
+
+  ctx.beginPath();
+
+  ctx.rect(
+    x,
+    y,
+    size,
+    size
+  );
+
+  ctx.clip();
+
+
+  ctx.drawImage(
+    img,
+    x +
+      (size - width) / 2,
+    y +
+      (size - height) / 2,
+    width,
+    height
+  );
+
+
+  ctx.restore();
+
+
+  /*
+     順位
+  */
+
+  ctx.fillStyle =
+    "rgba(0,0,0,.75)";
+
+  ctx.fillRect(
+    x,
+    y,
+    70,
+    52
+  );
+
+
+  ctx.fillStyle =
+    "#ffffff";
+
+  ctx.font =
+    "bold 30px sans-serif";
+
+  ctx.textAlign =
+    "center";
+
+
+  ctx.fillText(
+    `#${rank + 1}`,
+    x + 35,
+    y + 36
+  );
+
+
+  /*
+     名前・グループ
+  */
+
+  ctx.fillStyle =
+    "rgba(0,0,0,.78)";
+
+  ctx.fillRect(
+    x,
+    y + size - 55,
+    size,
+    55
+  );
+
+
+  ctx.fillStyle =
+    "#ffffff";
+
+  ctx.font =
+    "bold 17px sans-serif";
+
+
+  ctx.fillText(
+    members[
+      person.index
+    ].name,
+    x + size / 2,
+    y + size - 32
+  );
+
+
+  ctx.font =
+    "12px sans-serif";
+
+
+  ctx.fillText(
+    members[
+      person.index
+    ].group,
+    x + size / 2,
+    y + size - 13
   );
 
 }
@@ -2085,6 +2358,20 @@ function goTop() {
   location.reload();
 
 }
+
+
+/* =====================================================
+   ページ読み込み時
+===================================================== */
+
+window.addEventListener(
+  "DOMContentLoaded",
+  function() {
+
+    preloadImages();
+
+  }
+);
 
 </script>
 
