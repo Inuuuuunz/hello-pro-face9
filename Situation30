@@ -1,0 +1,398 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ハロプロシチュエーション30</title>
+<style>
+:root{--p:#ed82ad;--d:#a9366b;--bg:#fff7fb;--line:#f0d5e1}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:#382b33;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN",sans-serif}
+header{text-align:center;padding:24px 12px;background:linear-gradient(130deg,#f7b5d0,#f9dfeb)}
+h1{margin:0;font-size:clamp(24px,6vw,34px)}
+main{max-width:980px;margin:18px auto;padding:0 12px 35px}
+.panel{background:white;border:1px solid var(--line);border-radius:17px;padding:16px;margin:13px 0;box-shadow:0 3px 15px #a9366b0c}
+button,input,select{font:inherit}
+button{border:0;border-radius:11px;padding:10px 13px;background:var(--p);color:white;font-weight:700;cursor:pointer}
+button.alt{background:#f8e8f0;color:var(--d)}
+button:disabled{opacity:.28}
+.modes,.tools{display:flex;gap:8px;flex-wrap:wrap}
+.modes button{flex:1;min-width:190px}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.q{background:#fff2f7;color:#382b33;border:1px solid var(--line);text-align:left;min-height:82px;font-size:12px;padding:9px}
+.q.done{border:2px solid var(--p);background:#fce6ef}
+.num{display:block;color:var(--d);font-weight:800;margin-bottom:4px}
+.ans{color:var(--d);font-weight:700;margin-top:5px}
+.tools{align-items:center;margin:10px 0}
+input,select{border:1px solid var(--line);border-radius:9px;padding:9px;max-width:100%}
+.members{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:8px}
+.member{display:flex;align-items:center;gap:8px;text-align:left;background:white;color:#382b33;border:1px solid var(--line);min-height:65px}
+.member.sel{border:2px solid var(--d);background:#fff0f6}
+.member img{width:48px;height:58px;object-fit:cover;border-radius:6px}
+.member small{display:block;color:#806c77;font-weight:400}
+.results{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.result{border:1px solid var(--line);border-radius:10px;padding:9px;background:#fff5f8;font-size:12px}
+.result b{display:block;color:var(--d);margin-bottom:5px}
+.result img{width:100%;max-height:150px;object-fit:cover;border-radius:7px;margin-top:5px}
+.muted,footer{color:#806c77;font-size:12px;line-height:1.65}
+.hide{display:none!important}
+footer{padding:18px}
+@media(max-width:560px){
+.q{font-size:10px;padding:7px;min-height:95px}
+.results{gap:5px}
+.result{padding:6px;font-size:10px}
+.members{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+</style>
+</head>
+<body>
+<header>
+<h1>ハロプロシチュエーション30</h1>
+<p>30のシチュエーション、あなたなら誰を選ぶ？</p>
+</header>
+<main>
+<section id="home" class="panel">
+<h2>遊び方を選んでね</h2>
+<div class="modes">
+<button onclick="begin('all')">ハロプロ全体バージョン</button>
+<button class="alt" onclick="pickGroup()">グループ別バージョン</button>
+</div>
+<div id="gp" class="hide tools">
+<select id="group"></select>
+<button onclick="begin('group')">このグループで始める</button>
+</div>
+<p class="muted">全体版は通常1人1回。グループ別版は同じメンバーを何度でも選べます。</p>
+</section>
+
+<section id="game" class="hide">
+<div class="panel">
+<div class="tools">
+<h2 id="modeTitle">質問を選ぼう</h2>
+<button class="alt" onclick="home()">最初に戻る</button>
+</div>
+<p id="progress" class="muted"></p>
+<div id="qs" class="grid"></div>
+</div>
+
+<div id="picker" class="panel hide">
+<h2 id="qt"></h2>
+<p id="hint" class="muted"></p>
+<div class="tools">
+<button class="alt" onclick="setView('group')">グループ</button>
+<button class="alt" onclick="setView('name')">名前</button>
+<button class="alt" onclick="setView('photo')">画像</button>
+<input id="search" placeholder="名前で検索" oninput="drawMembers()">
+<select id="filter" onchange="drawMembers()"></select>
+</div>
+<div id="ml" class="members"></div>
+<div class="tools">
+<button id="multiDone" class="hide" onclick="finishMulti()">選択を確定</button>
+<button class="alt" onclick="closePicker()">閉じる</button>
+<button class="alt" onclick="clearAnswer()">回答を消す</button>
+</div>
+</div>
+
+<div class="panel">
+<h3>現在の回答</h3>
+<div id="summary" class="muted">まだ回答はありません。</div>
+<button onclick="showResults()">結果を確認する</button>
+</div>
+</section>
+
+<section id="resultPage" class="hide panel">
+<h2>あなたのハロプロシチュエーション30！</h2>
+<p id="reveal" class="ans hide">実は最後の質問だけ、すでに選んだメンバーも選べるようになってましたよー！ 気が付きましたか？😏</p>
+<div id="resultGrid" class="results"></div>
+<div class="tools">
+<button onclick="edit()">回答を編集する</button>
+<button class="alt" onclick="home()">最初から</button>
+</div>
+</section>
+
+<footer>
+<b>ご利用にあたって</b><br>
+本ページはファンによる非公式企画であり、ハロー！プロジェクト、各グループ、所属事務所および出演者とは一切関係ありません。掲載画像の権利は各権利者に帰属します。画像の無断転載・再配布等は行わず、利用者ご自身の責任の範囲でお楽しみください。画像はブラウザ上で表示するだけで、外部AI等へ送信する機能はありません。
+</footer>
+</main>
+
+<script>
+// メンバー一覧
+// 画像は ../images/ の中にあるファイルを参照します。
+const members = [
+{ name:"野中美希",group:"モーニング娘｡'26",image:"IMG_0781.jpeg" },
+{ name:"小田さくら",group:"モーニング娘｡'26",image:"IMG_0782.jpeg" },
+{ name:"岡村ほまれ",group:"モーニング娘｡'26",image:"IMG_0783.jpeg" },
+{ name:"山﨑愛生",group:"モーニング娘｡'26",image:"IMG_0784.jpeg" },
+{ name:"櫻井梨央",group:"モーニング娘｡'26",image:"IMG_0785.jpeg" },
+{ name:"井上春華",group:"モーニング娘｡'26",image:"IMG_0786.jpeg" },
+{ name:"弓桁朱琴",group:"モーニング娘｡'26",image:"IMG_0787.jpeg" },
+{ name:"杉原明紗",group:"モーニング娘｡'26",image:"IMG_0788.jpeg" },
+{ name:"安田美結",group:"モーニング娘｡'26",image:"IMG_0789.jpeg" },
+{ name:"鈴木もあ",group:"モーニング娘｡'26",image:"IMG_0790.jpeg" },
+{ name:"石川華望",group:"モーニング娘｡'26",image:"IMG_0791.jpeg" },
+
+{ name:"伊勢鈴蘭",group:"アンジュルム",image:"IMG_0792.jpeg" },
+{ name:"為永幸音",group:"アンジュルム",image:"IMG_0793.jpeg" },
+{ name:"橋迫鈴",group:"アンジュルム",image:"IMG_0794.jpeg" },
+{ name:"川名凛",group:"アンジュルム",image:"IMG_0795.jpeg" },
+{ name:"松本わかな",group:"アンジュルム",image:"IMG_0796.jpeg" },
+{ name:"平山遊季",group:"アンジュルム",image:"IMG_0797.jpeg" },
+{ name:"下井谷幸穂",group:"アンジュルム",image:"IMG_0798.jpeg" },
+{ name:"後藤花",group:"アンジュルム",image:"IMG_0799.jpeg" },
+{ name:"長野桃羽",group:"アンジュルム",image:"IMG_0800.jpeg" },
+
+{ name:"段原瑠々",group:"Juice=Juice",image:"IMG_0801.jpeg" },
+{ name:"井上玲音",group:"Juice=Juice",image:"IMG_0802.jpeg" },
+{ name:"工藤由愛",group:"Juice=Juice",image:"IMG_0803.jpeg" },
+{ name:"松永里愛",group:"Juice=Juice",image:"IMG_0804.jpeg" },
+{ name:"有澤一華",group:"Juice=Juice",image:"IMG_0805.jpeg" },
+{ name:"入江里咲",group:"Juice=Juice",image:"IMG_0806.jpeg" },
+{ name:"江端妃咲",group:"Juice=Juice",image:"IMG_0807.jpeg" },
+{ name:"石山咲良",group:"Juice=Juice",image:"IMG_0808.jpeg" },
+{ name:"遠藤彩加里",group:"Juice=Juice",image:"IMG_0809.jpeg" },
+{ name:"川嶋美楓",group:"Juice=Juice",image:"IMG_0810.jpeg" },
+{ name:"林仁愛",group:"Juice=Juice",image:"IMG_0811.jpeg" },
+
+{ name:"谷本安美",group:"つばきファクトリー",image:"IMG_0812.jpeg" },
+{ name:"小野瑞歩",group:"つばきファクトリー",image:"IMG_0813.jpeg" },
+{ name:"小野田紗栞",group:"つばきファクトリー",image:"IMG_0814.jpeg" },
+{ name:"秋山眞緒",group:"つばきファクトリー",image:"IMG_0815.jpeg" },
+{ name:"河西結心",group:"つばきファクトリー",image:"IMG_0816.jpeg" },
+{ name:"福田真琳",group:"つばきファクトリー",image:"IMG_0817.jpeg" },
+{ name:"豫風瑠乃",group:"つばきファクトリー",image:"IMG_0818.jpeg" },
+{ name:"石井泉羽",group:"つばきファクトリー",image:"IMG_0819.jpeg" },
+{ name:"村田結生",group:"つばきファクトリー",image:"IMG_0820.jpeg" },
+{ name:"土居楓奏",group:"つばきファクトリー",image:"IMG_0821.jpeg" },
+{ name:"西村乙輝",group:"つばきファクトリー",image:"IMG_0822.jpeg" },
+
+{ name:"西田汐里",group:"BEYOOOOONDS",image:"IMG_0823.jpeg" },
+{ name:"江口紗耶",group:"BEYOOOOONDS",image:"IMG_0824.jpeg" },
+{ name:"大坪茉乃",group:"BEYOOOOONDS",image:"IMG_0825.jpeg" },
+{ name:"杉山結菜",group:"BEYOOOOONDS",image:"IMG_0826.jpeg" },
+{ name:"前田こころ",group:"BEYOOOOONDS",image:"IMG_0827.jpeg" },
+{ name:"岡村美波",group:"BEYOOOOONDS",image:"IMG_0828.jpeg" },
+{ name:"清野桃々姫",group:"BEYOOOOONDS",image:"IMG_0829.jpeg" },
+{ name:"小島はな",group:"BEYOOOOONDS",image:"IMG_0830.jpeg" },
+{ name:"平井美葉",group:"BEYOOOOONDS",image:"IMG_0831.jpeg" },
+{ name:"小林萌花",group:"BEYOOOOONDS",image:"IMG_0832.jpeg" },
+{ name:"里吉うたの",group:"BEYOOOOONDS",image:"IMG_0833.jpeg" },
+
+{ name:"斉藤円香",group:"OCHANORMA",image:"IMG_0834.jpeg" },
+{ name:"広本瑠璃",group:"OCHANORMA",image:"IMG_0835.jpeg" },
+{ name:"米村姫良々",group:"OCHANORMA",image:"IMG_0836.jpeg" },
+{ name:"窪田七海",group:"OCHANORMA",image:"IMG_0837.jpeg" },
+{ name:"中山夏月姫",group:"OCHANORMA",image:"IMG_0838.jpeg" },
+{ name:"西﨑美空",group:"OCHANORMA",image:"IMG_0839.jpeg" },
+{ name:"北原もも",group:"OCHANORMA",image:"IMG_0840.jpeg" },
+{ name:"筒井澪心",group:"OCHANORMA",image:"IMG_0841.jpeg" },
+
+{ name:"橋田歩果",group:"ロージークロニクル",image:"IMG_0842.jpeg" },
+{ name:"吉田姫杷",group:"ロージークロニクル",image:"IMG_0843.jpeg" },
+{ name:"小野田華凜",group:"ロージークロニクル",image:"IMG_0844.jpeg" },
+{ name:"村越彩菜",group:"ロージークロニクル",image:"IMG_0845.jpeg" },
+{ name:"植村葉純",group:"ロージークロニクル",image:"IMG_0846.jpeg" },
+{ name:"松原ユリヤ",group:"ロージークロニクル",image:"IMG_0847.jpeg" },
+{ name:"島川波菜",group:"ロージークロニクル",image:"IMG_0848.jpeg" },
+{ name:"上村麗菜",group:"ロージークロニクル",image:"IMG_0849.jpeg" },
+{ name:"相馬優芽",group:"ロージークロニクル",image:"IMG_0850.jpeg" }
+];
+
+const questions = [
+"某ス〇バ☕️のひと際可愛い店員さんにいて欲しいメンバー",
+"一緒に浅草デートしたいメンバー",
+"会社や学校の上司､先輩に欲しいメンバー",
+"一緒にマリオカートをやりたいメンバー",
+"一緒にカラオケに行きたいメンバー",
+"熱を出したあなたを看病しに来てくれる幼なじみに欲しいメンバー",
+"美味しいパスタ作ってくれる家庭的なメンバー",
+"勉強や仕事中に夜食や差し入れしてくれるメンバー",
+"近所のコンビニで働いている推し店員さん",
+"特撮ヒーローのピンクを役をして欲しいメンバー",
+"ドライブを一緒にしたいメンバー",
+"大事な発表の時､傍にいて欲しいメンバー",
+"清涼飲料水のCMに出て欲しいメンバー",
+"文化祭でクラスTシャツをアレンジしてきそうなメンバー",
+"リレーのアンカーを任されそうなメンバー",
+"初めて行った美容室で担当してほしいメンバー",
+"ラーメン屋で頼んだ餃子を分けてくれそうなメンバー",
+"下町のお花屋さんで働いてて欲しいメンバー",
+"生徒からあだ名で呼ばれてそうな先生になりそうなメンバー",
+"ババ抜きを勝つまでやりそうなメンバー",
+"サンタさんを信じてそうなメンバー",
+"エナジードリンクで眠れなくなっちゃいそうなメンバー",
+"お酒飲んだ大人の代わりに車を出してくれそうな従姉妹のお姉ちゃん",
+"図画工作の成績をA(5)以外取ったこと無さそうなメンバー",
+"子供向け教育番組のMCをやって欲しいメンバー",
+"戦うとしたら武器が弓っぽいメンバー",
+"一緒にサイザリアで5時間潰せそうなメンバー",
+"セルフレジが苦手そうなメンバー",
+"オムライスにケチャップでお絵描きが上手そうなメンバー",
+"自慢の推し"
+];
+
+let mode="all",groupName="",active=-1,view="name";
+let answers=Array(30).fill(null),multi=new Set();
+
+const el=id=>document.getElementById(id);
+const groups=()=>[...new Set(members.map(m=>m.group))];
+
+function esc(s){
+return String(s??"").replace(/[&<>"']/g,c=>({
+"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+}[c]));
+}
+
+function fillGroups(){
+let o=groups().map(g=>`<option value="${esc(g)}">${esc(g)}</option>`).join("");
+el("group").innerHTML=o;
+el("filter").innerHTML='<option value="">全グループ</option>'+o;
+}
+
+function pickGroup(){
+if(!members.length)return alert("メンバー一覧がありません。");
+fillGroups();
+el("gp").classList.remove("hide");
+}
+
+function begin(m){
+if(!members.length)return alert("メンバー一覧がありません。");
+mode=m;
+groupName=m==="group"?el("group").value:"";
+answers=Array(30).fill(null);
+el("home").classList.add("hide");
+el("resultPage").classList.add("hide");
+el("game").classList.remove("hide");
+el("modeTitle").textContent=m==="all"?"ハロプロ全体バージョン":"グループ別："+groupName;
+fillGroups();
+renderQs();
+summary();
+}
+
+function renderQs(){
+el("qs").innerHTML=questions.map((q,i)=>{
+let a=answers[i];
+let n=Array.isArray(a)?a.map(x=>x.name).join("、"):a?.name||"";
+return `<button class="q ${a?"done":""}" onclick="openQ(${i})">
+<span class="num">Q${i+1}</span>${esc(q)}
+<div class="ans">${esc(n||"未選択")}</div>
+</button>`;
+}).join("");
+el("progress").textContent=`回答済み ${answers.filter(Boolean).length} / 30`;
+}
+
+function openQ(i){
+active=i;
+multi=new Set(Array.isArray(answers[i])?answers[i].map(x=>x.name):[]);
+el("qt").textContent=`Q${i+1}. ${questions[i]}`;
+el("search").value="";
+el("filter").value=mode==="group"?groupName:"";
+el("multiDone").classList.toggle("hide",!(mode==="all"&&i===29));
+el("hint").textContent=mode==="all"&&i===29
+?"複数選択できます。選び終わったら「選択を確定」を押してください。"
+:"メンバーを1人選んでください。";
+el("picker").classList.remove("hide");
+setView("name");
+renderQs();
+}
+
+function setView(v){
+view=v;
+drawMembers();
+}
+
+function drawMembers(){
+let s=el("search").value.toLowerCase();
+let g=el("filter").value;
+let arr=members.filter(m=>(!g||m.group===g)&&(!s||m.name.toLowerCase().includes(s)));
+if(mode==="group")arr=arr.filter(m=>m.group===groupName);
+let isMulti=mode==="all"&&active===29;
+
+el("ml").innerHTML=arr.map(m=>{
+let sel=multi.has(m.name);
+let used=mode==="all"&&!isMulti&&answers.some((a,i)=>
+i!==active&&(Array.isArray(a)?a.some(x=>x.name===m.name):a?.name===m.name)
+);
+let im=view==="photo"
+?`<img src="../images/${encodeURIComponent(m.image)}" onerror="this.style.display='none'">`
+:"";
+return `<button class="member ${sel?"sel":""}" ${used&&!sel?"disabled":""} onclick="choose('${esc(m.name)}')">
+${im}<span>${esc(m.name)}<small>${esc(m.group)}</small></span>
+</button>`;
+}).join("")||"該当するメンバーがいません。";
+}
+
+function choose(n){
+let m=members.find(x=>x.name===n);
+if(mode==="all"&&active===29){
+multi.has(n)?multi.delete(n):multi.add(n);
+drawMembers();
+}else{
+answers[active]=m;
+closePicker();
+summary();
+}
+}
+
+function finishMulti(){
+answers[29]=members.filter(m=>multi.has(m.name));
+closePicker();
+summary();
+}
+
+function closePicker(){
+el("picker").classList.add("hide");
+active=-1;
+renderQs();
+}
+
+function clearAnswer(){
+if(active<0)return;
+answers[active]=null;
+closePicker();
+summary();
+}
+
+function summary(){
+let a=answers.map((x,i)=>x?
+`<div><b>Q${i+1}.</b> ${esc(questions[i])}<br>${
+esc(Array.isArray(x)?x.map(m=>m.name).join("、"):x.name)
+}</div>`:"").filter(Boolean);
+el("summary").innerHTML=a.length?a.join("<hr>"):"まだ回答はありません。";
+}
+
+function showResults(){
+el("game").classList.add("hide");
+el("resultPage").classList.remove("hide");
+el("reveal").classList.toggle("hide",mode!=="all");
+
+el("resultGrid").innerHTML=questions.map((q,i)=>{
+let a=answers[i];
+let arr=Array.isArray(a)?a:a?[a]:[];
+return `<div class="result"><b>Q${i+1}. ${esc(q)}</b>${
+arr.length?arr.map(m=>`
+<div>${esc(m.name)} <small>(${esc(m.group)})</small>
+${m.image?`<img src="../images/${encodeURIComponent(m.image)}" onerror="this.style.display='none'">`:""}
+</div>`).join(""):"<span class='muted'>未選択</span>"
+}</div>`;
+}).join("");
+}
+
+function edit(){
+el("resultPage").classList.add("hide");
+el("game").classList.remove("hide");
+renderQs();
+summary();
+}
+
+function home(){
+if(!confirm("最初に戻ると回答はリセットされます。よろしいですか？"))return;
+el("game").classList.add("hide");
+el("resultPage").classList.add("hide");
+el("home").classList.remove("hide");
+el("picker").classList.add("hide");
+answers=Array(30).fill(null);
+active=-1;
+}
+</script>
+</body>
+</html>
