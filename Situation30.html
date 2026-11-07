@@ -117,7 +117,6 @@ footer{padding:18px}
 
 <script>
 // メンバー一覧
-// 画像は ../images/ の中にあるファイルを参照します。
 const members = [
 { name:"野中美希",group:"モーニング娘｡'26",image:"IMG_0781.jpeg" },
 { name:"小田さくら",group:"モーニング娘｡'26",image:"IMG_0782.jpeg" },
@@ -313,7 +312,7 @@ let used=mode==="all"&&!isMulti&&answers.some((a,i)=>
 i!==active&&(Array.isArray(a)?a.some(x=>x.name===m.name):a?.name===m.name)
 );
 let im=view==="photo"
-?`<img src="../images/${encodeURIComponent(m.image)}" onerror="this.style.display='none'">`
+?`<img src="${encodeURIComponent(m.image)}" onerror="this.style.display='none'">`
 :"";
 return `<button class="member ${sel?"sel":""}" ${used&&!sel?"disabled":""} onclick="choose('${esc(m.name)}')">
 ${im}<span>${esc(m.name)}<small>${esc(m.group)}</small></span>
@@ -371,7 +370,7 @@ let arr=Array.isArray(a)?a:a?[a]:[];
 return `<div class="result"><b>Q${i+1}. ${esc(q)}</b>${
 arr.length?arr.map(m=>`
 <div>${esc(m.name)} <small>(${esc(m.group)})</small>
-${m.image?`<img src="../images/${encodeURIComponent(m.image)}" onerror="this.style.display='none'">`:""}
+${m.image?`<img src="${encodeURIComponent(m.image)}" onerror="this.style.display='none'">`:""}
 </div>`).join(""):"<span class='muted'>未選択</span>"
 }</div>`;
 }).join("");
