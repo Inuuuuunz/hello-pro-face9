@@ -78,9 +78,6 @@ footer{padding:18px}
 <h2 id="qt"></h2>
 <p id="hint" class="muted"></p>
 <div class="tools">
-<button class="alt" onclick="setView('group')">グループ</button>
-<button class="alt" onclick="setView('name')">名前</button>
-<button class="alt" onclick="setView('photo')">画像</button>
 <input id="search" placeholder="名前で検索" oninput="drawMembers()">
 <select id="filter" onchange="drawMembers()"></select>
 </div>
@@ -229,7 +226,7 @@ const questions = [
 "自慢の推し"
 ];
 
-let mode="all",groupName="",active=-1,view="name";
+let mode="all",groupName="",active=-1;
 let answers=Array(30).fill(null),multi=new Set();
 
 const el=id=>document.getElementById(id);
@@ -290,13 +287,8 @@ el("hint").textContent=mode==="all"&&i===29
 ?"複数選択できます。選び終わったら「選択を確定」を押してください。"
 :"メンバーを1人選んでください。";
 el("picker").classList.remove("hide");
-setView("name");
-renderQs();
-}
-
-function setView(v){
-view=v;
 drawMembers();
+renderQs();
 }
 
 function drawMembers(){
@@ -311,9 +303,7 @@ let sel=multi.has(m.name);
 let used=mode==="all"&&!isMulti&&answers.some((a,i)=>
 i!==active&&(Array.isArray(a)?a.some(x=>x.name===m.name):a?.name===m.name)
 );
-let im=view==="photo"
-?`<img src="${encodeURIComponent(m.image)}" onerror="this.style.display='none'">`
-:"";
+let im=`<img src="${encodeURIComponent(m.image)}" onerror="this.style.display='none'">`;
 return `<button class="member ${sel?"sel":""}" ${used&&!sel?"disabled":""} onclick="choose('${esc(m.name)}')">
 ${im}<span>${esc(m.name)}<small>${esc(m.group)}</small></span>
 </button>`;
